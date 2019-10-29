@@ -58,7 +58,7 @@ void HttpRequest::BuildQuery(std::string url)
         //! note that = is not allowed as part of the query data (for example, this url is not allowed: /base/page?p1=a==)
         // ref: RFC 3986 section 3.4
         queryTmp = SplitOptional(queryPart, "=");
-        if(queryTmp.size() == 1) // in case there is a url like this: proto:path?a&b=5, a=""
+        if (queryTmp.size() == 1) // in case there is a url like this: proto:path?a&b=5, a=""
         {
             key = queryTmp.front();
             value = "";
@@ -70,4 +70,9 @@ void HttpRequest::BuildQuery(std::string url)
         }
         this->query.insert(std::pair<std::string, std::string>(key, value));
     }
+}
+
+bool HttpRequest::IsInUrlParams(std::string key) const
+{
+    return this->urlParams.find(key) != this->urlParams.end()
 }
