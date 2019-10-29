@@ -76,3 +76,8 @@ bool HttpRequest::IsInUrlParams(std::string key) const
 {
     return this->urlParams.find(key) != this->urlParams.end();
 }
+
+std::string HttpRequest::GetUrl() const
+{
+    return this->rawUrl;
+}
