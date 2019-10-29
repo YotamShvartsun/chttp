@@ -74,5 +74,5 @@ void HttpRequest::BuildQuery(std::string url)
 
 bool HttpRequest::IsInUrlParams(std::string key) const
 {
-    return this->urlParams.find(key) != this->urlParams.end()
+    return this->urlParams.find(key) != this->urlParams.end();
 }
