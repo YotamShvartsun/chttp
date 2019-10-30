@@ -12,6 +12,7 @@ private:
     std::string rawUrl;
     std::map<std::string, std::string> urlParams;
     std::map<std::string, std::string> query;
+    std::map<std::string, std::string> headers;
     void BuildQuery(std::string);
 public:
     HttpRequest();

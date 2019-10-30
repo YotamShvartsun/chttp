@@ -81,3 +81,19 @@ std::string HttpRequest::GetUrl() const
 {
     return this->rawUrl;
 }
+
+void HttpRequest::PopulateParams(const Url& urlSpec)
+{
+    std::map<int, std::string> spec = urlSpec.GetUrlParamSpec();
+    std::vector<std::string> splittedUrl = SplitOptional(this->rawUrl, "/");
+    for(int i = 0; i < splittedUrl.size(); i++)
+    {
+        if(spec.find(i) != spec.end())
+        {
+            this->urlParams.insert(std::pair<std::string, std::string>(spec.at(i), splittedUrl[i]));
+            #ifdef DEBUG
+            std::cout << "Key: " << spec.at(i) << " Value: " << splittedUrl[i] << std::endl;
+            #endif
+        }
+    }
+}
