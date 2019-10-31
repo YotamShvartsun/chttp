@@ -1,8 +1,10 @@
 #include <chttp/util/Url.h>
 #include <string>
 
-Url::Url(std::string baseUrl, std::map<int, std::string> spec) : baseURL(baseUrl), urlParams(spec)
+Url::Url(std::string& baseUrl, std::unordered_map<int, std::string> &spec)
 {
+    this->baseURL = baseUrl;
+    this->urlParams = spec;
 }
 
 bool Url::IsMatch(std::string url) const
@@ -10,7 +12,7 @@ bool Url::IsMatch(std::string url) const
     return url.find(this->baseURL) != std::string::npos;
 }
 
-std::map<int, std::string> Url::GetUrlParamSpec() const
+std::unordered_map<int, std::string> Url::GetUrlParamSpec() const
 {
     return this->urlParams;
 }

@@ -84,7 +84,7 @@ std::string HttpRequest::GetUrl() const
 
 void HttpRequest::PopulateParams(const Url& urlSpec)
 {
-    std::map<int, std::string> spec = urlSpec.GetUrlParamSpec();
+    std::unordered_map<int, std::string> spec = urlSpec.GetUrlParamSpec();
     std::vector<std::string> splittedUrl = SplitOptional(this->rawUrl, "/");
     for(int i = 0; i < splittedUrl.size(); i++)
     {
