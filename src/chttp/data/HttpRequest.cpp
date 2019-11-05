@@ -1,14 +1,29 @@
 #include <chttp/data/HttpRequest.h>
 #include <sstream>
 
-HttpRequest::HttpRequest() {}
+HttpRequest::HttpRequest() = default;
 
 /**
- * @brief  Splitst string using one of the delimiters given in 
+ * splits data to two parts: everything before del and everything after it
+ * @throws error when data doesn't contain del
+ * @param data
+ * @param del
+ * @return vector
+ */
+std::vector<std::string> SplitOnce(std::string &data, const std::string &del) {
+    std::string tmp = data.substr(0, data.find(del, 0));
+    std::vector<std::string> res;
+    res.push_back(tmp);
+    res.push_back(data.substr(tmp.length() + 1));
+    return res;
+}
+
+/**
+ * @brief  Splits string using one of the delimiters given in
  * @note   this is not a part of HttpRequest, just a helper function
  * @param  data: data to split
  * @param  delimiters: optional delimiters to split by
- * @retval splitted data
+ * @retval Splitted data
  */
 std::vector<std::string> SplitOptional(std::string &data, const std::string &delimiters)
 {
@@ -43,7 +58,7 @@ void HttpRequest::BuildQuery(std::string url)
 
     urlSplitted = SplitOptional(url, "?");
     queryRaw = urlSplitted.back();
-    fragmentPos = queryRaw.find("#");
+    fragmentPos = queryRaw.find('#');
     if (fragmentPos != std::string::npos)
     {
         queryRaw.erase(fragmentPos);
@@ -72,7 +87,7 @@ void HttpRequest::BuildQuery(std::string url)
     }
 }
 
-bool HttpRequest::IsInUrlParams(std::string key) const
+bool HttpRequest::IsInUrlParams(const std::string &key) const
 {
     return this->urlParams.find(key) != this->urlParams.end();
 }
@@ -86,7 +101,7 @@ void HttpRequest::PopulateParams(const Url& urlSpec)
 {
     std::unordered_map<int, std::string> spec = urlSpec.GetUrlParamSpec();
     std::vector<std::string> splittedUrl = SplitOptional(this->rawUrl, "/");
-    for(int i = 0; i < splittedUrl.size(); i++)
+    for (size_t i = 0; i < splittedUrl.size(); i++)
     {
         if(spec.find(i) != spec.end())
         {
@@ -96,4 +111,48 @@ void HttpRequest::PopulateParams(const Url& urlSpec)
             #endif
         }
     }
+}
+
+std::unordered_map<std::string, std::string> HttpRequest::ParseHTTPHeaders(std::vector<char> data) {
+    std::string asString(data.data());
+    std::vector<std::string> lines, filteredLines;
+    std::unordered_map<std::string, std::string> result;
+    std::size_t prev = 0, pos;
+    while ((pos = asString.find("\r\n", prev)) != std::string::npos) {
+        if (asString[prev] == '\n') {
+            prev++;
+        }
+        if (pos > prev)
+            lines.push_back(asString.substr(prev, pos - prev));
+        prev = pos + 1;
+    }
+    if (prev < asString.length())
+        lines.push_back(asString.substr(prev, std::string::npos));
+#ifdef DEBUG
+    for (auto &l : lines)
+        std::cout << l << std::endl;
+#endif
+    // filter the lines to the headers part (contains ':')
+    for (auto &l : lines) {
+        if (l == "\n")
+            continue; // \n means this is the last line
+        if (l.find(':') != std::string::npos)
+            filteredLines.push_back(l);
+    }
+
+#ifdef DEBUG
+    std::cout << "Filtered lines:" << std::endl;
+    for (auto &l : filteredLines)
+        std::cout << l << std::endl;
+#endif
+    std::vector<std::string> tmp;
+    for (auto &l : filteredLines) {
+        tmp = SplitOnce(l, ":");
+        result.insert(std::make_pair(tmp.front(), tmp.back()));
+    }
+#ifdef DEBUG
+    std::cout << "RESULT:" << std::endl;
+    for (auto &i : result)
+        std::cout << i.first << ":" << i.second << std::endl;
+#endif
 }

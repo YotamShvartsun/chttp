@@ -45,4 +45,11 @@ public:
      * @retval None
      */
     virtual void FromString(std::vector<char>) = 0;
+
+    /**
+     * @brief Parses HTTP headers
+     * @param data the header part of the request - the request until \n\r\n\r
+     * @return map of the headers and the values
+     */
+    static std::unordered_map<std::string, std::string> ParseHTTPHeaders(std::vector<char> data);
 };
