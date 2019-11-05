@@ -3,6 +3,8 @@ project(chttp)
 
 set(CMAKE_CXX_STANDARD 14)
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+
 include_directories(include)
 include_directories(include/chttp)
 include_directories(include/chttp/data)
