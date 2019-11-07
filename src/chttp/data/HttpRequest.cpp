@@ -116,7 +116,7 @@ void HttpRequest::PopulateParams(const Url& urlSpec)
 std::unordered_map<std::string, std::string> HttpRequest::ParseHTTPHeaders(std::vector<char> data) {
     std::string asString(data.data());
     std::vector<std::string> lines, filteredLines;
-    std::unordered_map<std::string, std::string> result;
+    std::unordered_map<std::string, std::string> res;
     std::size_t prev = 0, pos;
     while ((pos = asString.find("\r\n", prev)) != std::string::npos) {
         if (asString[prev] == '\n') {
@@ -148,11 +148,20 @@ std::unordered_map<std::string, std::string> HttpRequest::ParseHTTPHeaders(std::
     std::vector<std::string> tmp;
     for (auto &l : filteredLines) {
         tmp = SplitOnce(l, ":");
-        result.insert(std::make_pair(tmp.front(), tmp.back()));
+        res.insert(std::make_pair(tmp.front(), tmp.back()));
     }
 #ifdef DEBUG
     std::cout << "RESULT:" << std::endl;
-    for (auto &i : result)
+    for (auto &i : res)
         std::cout << i.first << ":" << i.second << std::endl;
 #endif
+    return res;
+}
+
+std::unordered_map<std::string, std::string> HttpRequest::GetHeaders() const {
+    return this->headers;
+}
+
+std::map<std::string, std::string> HttpRequest::GetQuery() const {
+    return this->query;
 }
