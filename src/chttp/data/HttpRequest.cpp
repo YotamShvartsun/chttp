@@ -68,6 +68,8 @@ void HttpRequest::BuildQuery(std::string url)
     std::cout << "Url raw query string: " << queryRaw << std::endl;
 #endif
     querySplitted = SplitOptional(queryRaw, "&;");
+    if (querySplitted.size() == 1 && querySplitted[0] == queryRaw)
+        return;
     for (auto &queryPart : querySplitted)
     {
         //! note that = is not allowed as part of the query data (for example, this url is not allowed: /base/page?p1=a==)
