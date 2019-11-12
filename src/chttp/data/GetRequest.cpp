@@ -2,6 +2,7 @@
 
 #include <sstream>
 #include <utility>
+#include <algorithm>
 
 GetRequest::GetRequest(std::vector<char> data) {
     this->FromString(std::move(data));
@@ -34,4 +35,12 @@ void GetRequest::FromString(std::vector<char> data) {
 #endif
     std::vector<char> tmp(headers.begin(), headers.end());
     this->headers = HttpRequest::ParseHTTPHeaders(tmp);
+}
+
+GetRequest &GetRequest::operator=(const GetRequest &other) {
+    std::copy(other.rawUrl.begin(), other.rawUrl.end(), this->rawUrl.begin());
+    this->query = other.query;
+    this->headers = other.headers;
+    this->urlParams = other.urlParams;
+    return *this;
 }

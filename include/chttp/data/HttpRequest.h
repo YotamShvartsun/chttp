@@ -36,14 +36,13 @@ public:
      * Get the request headers
      * @return request headers
      */
-    std::map<std::string, std::string> GetHeaders() const;
+    std::unordered_map<std::string, std::string> GetHeaders() const;
 
     /**
      * Get the URL-query part
      * @return url query
      */
     std::map<std::string, std::string> GetQuery() const;
-
     /**
      * @brief  Returns the value of url the parameter specified
      * @note   If the name given cannot be found, it will throw std::runtime_error
