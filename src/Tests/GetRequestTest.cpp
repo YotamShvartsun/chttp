@@ -1,5 +1,6 @@
 #include <iostream>
 #include "chttp/data/GetRequest.h"
+#include "chttp/util/Url.h"
 
 #define FAIL std::cout << "Failed" << std::endl;\
 return false;
@@ -60,12 +61,45 @@ bool QueryTest() {
     return true;
 }
 
+bool UrlParamTest() {
+    std::cout << "  Url-structure parameters: " << std::endl;
+    std::cout << "      Parsing basic url template: ";
+    std::unordered_map<int, std::string> spec;
+    spec.insert(std::make_pair(1, "profile"));
+    spec.insert(std::make_pair(2, "action"));
+    std::string base = "users";
+    Url urlTemplate(base, spec);
+    std::string req("GET /users/admin/killall\r\n\r\n");
+    std::vector<char> data(req.begin(), req.end());
+    GetRequest r(data);
+    r.PopulateParams(urlTemplate);
+    if (!r.IsInUrlParams("profile") || !r.IsInUrlParams("action")) {
+        FAIL
+    }
+    std::cout << "Passed!" << std::endl;
+    return true;
+}
+
+bool NoDataTest() {
+    std::cout << "  Build request with no data: ";
+    std::vector<char> data;
+    try {
+        GetRequest g(data);
+        FAIL
+    } catch (std::runtime_error &err) {
+        std::cerr << err.what() << std::endl;
+        std::cout << "Passed!" << std::endl;
+        return true;
+    }
+}
+
 void TestGet() {
     bool isPassing = true;
     std::cout << "Testing GET request: " << std::endl;
     isPassing &= HeadersTest();
     isPassing &= QueryTest();
-
+    isPassing &= UrlParamTest();
+    isPassing &= NoDataTest();
     std::cout << "GET request test status: ";
     if (isPassing)
         std::cout << "\u001b[32m" << "\uF00C" << "\u001b[0m" << std::endl;
