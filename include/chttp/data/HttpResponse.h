@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 #include <unordered_map>
 
 // based on https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
@@ -70,71 +71,114 @@ enum HTTP_STATUS {
     Network_Authentication_Required = 511
 };
 
-class HttpResponse{
+class HttpResponse {
 private:
     const std::unordered_map<HTTP_STATUS, std::string> HttpCodeStrings = {
-            {Continue, "Continue"},
-            {Switching_Protocols, "Switching Protocols"},
-            {Processing, "Processing"},
-            {Early_Hints, "Early Hints"},
-            {OK, "OK"},
-            {Created, "Created"},
-            {Accepted, "Accepted"},
-            {Non_Authoritative_Information, "Non-Authoritative Information"},
-            {No_Content, "No Content"},
-            {Reset_Content, "Reset Content"},
-            {Partial_Content, "Partial Content"},
-            {Multi_Status, "Multi Status"},
-            {Already_Reported, "Already Reported"},
-            {IM_Used, "IM Used"},
-            {Multiple_Choices, "Multiple Choices"},
-            {Moved_Permanently, "Moved Permanently"},
-            {Found, "Found"},
-            {See_Other, "See Other"},
-            {Not_Modified, "Not Modified"},
-            {Use_Proxy, "Use Proxy"},
-            {Switch_Proxy, "Switch Proxy"},
-            {Temporary_Redirect, "Temporary Redirect"},
-            {Permanent_Redirect, "Permanent Redirect"},
-            {Bad_Request, "Bad Request"},
-            {Unauthorized, "Unauthorized"},
-            {Payment_Required, "Payment Required"},
-            {Forbidden, "Forbidden"},
-            {Not_Found, "Not Found"},
-            {Method_Not_Allowed, "Method Not Allowed"},
-            {Not_Acceptable, "Not Acceptable"},
-            {Proxy_Authentication_Required, "Proxy Authentication Required"},
-            {Request_Timeout, "Request Timeout"},
-            {Conflict, "Conflict"},
-            {Gone, "Gone"},
-            {Length_Required, "Length Required"},
-            {Precondition_Failed, "Precondition Failed"},
-            {Payload_Too_Large, "Payload Too Large"},
-            {URI_Too_Long, "URI Too Long"},
-            {Unsupported_Media_Type, "Unsupported Media Type"},
-            {Range_Not_Satisfiable, "Range Not Satisfiable"},
-            {Expectation_Failed, "Expectation Failed"},
-            {Im_a_teapot, "I'm a teapot"},
-            {Misdirected_Request, "Misdirected Request"},
-            {Unprocessable_Entity, "Unprocessable Entity"},
-            {Locked, "Locked"},
-            {Failed_Dependency, "Failed Dependency"},
-            {Too_Early, "Too Early"},
-            {Upgrade_Required, "Upgrade Required"},
-            {Precondition_Required, "Precondition Required"},
-            {Too_Many_Requests, "Too Many Requests"},
+            {Continue,                        "Continue"},
+            {Switching_Protocols,             "Switching Protocols"},
+            {Processing,                      "Processing"},
+            {Early_Hints,                     "Early Hints"},
+            {OK,                              "OK"},
+            {Created,                         "Created"},
+            {Accepted,                        "Accepted"},
+            {Non_Authoritative_Information,   "Non-Authoritative Information"},
+            {No_Content,                      "No Content"},
+            {Reset_Content,                   "Reset Content"},
+            {Partial_Content,                 "Partial Content"},
+            {Multi_Status,                    "Multi Status"},
+            {Already_Reported,                "Already Reported"},
+            {IM_Used,                         "IM Used"},
+            {Multiple_Choices,                "Multiple Choices"},
+            {Moved_Permanently,               "Moved Permanently"},
+            {Found,                           "Found"},
+            {See_Other,                       "See Other"},
+            {Not_Modified,                    "Not Modified"},
+            {Use_Proxy,                       "Use Proxy"},
+            {Switch_Proxy,                    "Switch Proxy"},
+            {Temporary_Redirect,              "Temporary Redirect"},
+            {Permanent_Redirect,              "Permanent Redirect"},
+            {Bad_Request,                     "Bad Request"},
+            {Unauthorized,                    "Unauthorized"},
+            {Payment_Required,                "Payment Required"},
+            {Forbidden,                       "Forbidden"},
+            {Not_Found,                       "Not Found"},
+            {Method_Not_Allowed,              "Method Not Allowed"},
+            {Not_Acceptable,                  "Not Acceptable"},
+            {Proxy_Authentication_Required,   "Proxy Authentication Required"},
+            {Request_Timeout,                 "Request Timeout"},
+            {Conflict,                        "Conflict"},
+            {Gone,                            "Gone"},
+            {Length_Required,                 "Length Required"},
+            {Precondition_Failed,             "Precondition Failed"},
+            {Payload_Too_Large,               "Payload Too Large"},
+            {URI_Too_Long,                    "URI Too Long"},
+            {Unsupported_Media_Type,          "Unsupported Media Type"},
+            {Range_Not_Satisfiable,           "Range Not Satisfiable"},
+            {Expectation_Failed,              "Expectation Failed"},
+            {Im_a_teapot,                     "I'm a teapot"},
+            {Misdirected_Request,             "Misdirected Request"},
+            {Unprocessable_Entity,            "Unprocessable Entity"},
+            {Locked,                          "Locked"},
+            {Failed_Dependency,               "Failed Dependency"},
+            {Too_Early,                       "Too Early"},
+            {Upgrade_Required,                "Upgrade Required"},
+            {Precondition_Required,           "Precondition Required"},
+            {Too_Many_Requests,               "Too Many Requests"},
             {Request_Header_Fields_Too_Large, "Request Header Fields Too Large"},
-            {Unavailable_For_Legal_Reasons, "Unavailable For Legal Reasons"},
-            {Internal_Server_Error, "Internal Server Error"},
-            {Not_Implemented, "Not Implemented"},
-            {Bad_Gateway, "Bad Gateway"},
-            {Service_Unavailable, "Service Unavailable"},
-            {Gateway_Timeout, "Gateway Timeout"},
-            {HTTP_Version_Not_Supported, "HTTP Version Not Supported"},
-            {Variant_Also_Negotiates, "Variant Also Negotiates"},
-            {Insufficient_Storage, "Insufficient Storage"},
-            {Loop_Detected, "Loop Detected"},
-            {Not_Extended, "Not_Extended"},
+            {Unavailable_For_Legal_Reasons,   "Unavailable For Legal Reasons"},
+            {Internal_Server_Error,           "Internal Server Error"},
+            {Not_Implemented,                 "Not Implemented"},
+            {Bad_Gateway,                     "Bad Gateway"},
+            {Service_Unavailable,             "Service Unavailable"},
+            {Gateway_Timeout,                 "Gateway Timeout"},
+            {HTTP_Version_Not_Supported,      "HTTP Version Not Supported"},
+            {Variant_Also_Negotiates,         "Variant Also Negotiates"},
+            {Insufficient_Storage,            "Insufficient Storage"},
+            {Loop_Detected,                   "Loop Detected"},
+            {Not_Extended,                    "Not_Extended"},
             {Network_Authentication_Required, "Network Authentication Required"}
     };
+    HTTP_STATUS status;
+    std::vector<char> payload;
+    std::unordered_map<std::string, std::string> headers;
+    bool dataSet;
+
+    std::string BuildHeaders();
+
+public:
+    HttpResponse();
+
+    /**
+     * @brief This function sets the response status
+     * @param code the status code
+     */
+    void SetStatus(HTTP_STATUS);
+
+    /**
+     * @brief This function adds another header and a value to the response header list
+     * @note if a header has already been set, this function will replace its value
+     * @param key name of the header
+     * @param value value for header key
+     */
+    void Header(const std::string &, const std::string &);
+
+    /**
+     * @brief send the content of a given file
+     * @param path the path of the file
+     * @throws std::logic_error if this function or Raw has been called already
+     */
+    void SendFile(const std::string &);
+
+    /**
+     * @brief send the data in buffer
+     * @param data data to send
+     * @throws std::logic_error if this function or SendFile has been called
+     */
+    void Raw(const std::vector<char> &);
+
+    /**
+     * @brief format this response to text
+     * @return this response as a valid HTTP response
+     */
+    std::vector<char> Format();
 };
