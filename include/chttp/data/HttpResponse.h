@@ -138,6 +138,17 @@ private:
             {Not_Extended,                    "Not_Extended"},
             {Network_Authentication_Required, "Network Authentication Required"}
     };
+    std::unordered_map<std::string, std::string> MIME_TYPES = {
+            {".js",    "application/javascript"},
+            {".jsonp", "application/javascript"},
+            {".json",  "application/json"},
+            {".gif",   "image/gif"},
+            {".jpeg",  "image/jpeg"},
+            {".jpg",   "image/jpeg"},
+            {".mp3",   "audio/mpeg"},
+            {".gz",    "application/gzip"},
+            {".png",   "image/png"}
+    };
     HTTP_STATUS status;
     std::vector<char> payload;
     std::unordered_map<std::string, std::string> headers;
