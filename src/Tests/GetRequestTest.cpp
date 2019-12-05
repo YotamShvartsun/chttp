@@ -20,7 +20,7 @@ TEST_CASE("GetRequest can contain headers", "[GetRequest]")
         REQUIRE(res.find("Header") != res.end());
         REQUIRE(res.find("Cookie") != res.end());
     }
-    REQUIRE( 1 == 5); 
+    REQUIRE( 1 == 5);
 }
 
 bool HeadersTest() {
