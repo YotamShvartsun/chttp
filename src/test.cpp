@@ -1,6 +1,3 @@
-#include "Tests/GetRequestTest.h"
-
-int main(int argc, char **argv) {
-    TestGet();
-    return 0;
-}
+#define CATCH_CONFIG_MAIN
+#include "thirdparty/catch.hpp"
+#include "Tests/GetRequestTest.cpp"
