@@ -1,7 +1,6 @@
 #include <iterator>
 #include <iostream>
 #include <fstream>
-#include <filesystem>
 // including headers in order to stop using the std::filesystem lib, due to bug in libc++
 // this bug IS solved in gcc-9 and g++-9, but this should work with other compiler versions too
 #ifndef _WIN32
@@ -50,7 +49,7 @@ void HttpResponse::SendFile(const std::string &path) {
     if (this->dataSet)
         throw std::logic_error("Data already set!");
     if (!FileExists(path))
-        throw std::runtime_error("File not found in path specified!");
+        throw std::runtime_error("MultipartField not found in path specified!");
     std::string ext = path.substr(path.find_last_of('.'));
     std::ifstream file(path, std::ios::binary);
     this->payload = std::vector<char>((std::istreambuf_iterator<char>(file)),
