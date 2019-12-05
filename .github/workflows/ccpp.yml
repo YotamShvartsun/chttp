@@ -1,9 +1,6 @@
 name: C/C++ CI
 
-on:
-  push:
-    tags:
-      - '!refs/tags/*'
+on:[push,pull_request]
 
 jobs:
   build:
