@@ -14,4 +14,4 @@ jobs:
     - name: make
       run: make
     - name: tests
-      run: ./chttp
+      run: ./chttpTest
