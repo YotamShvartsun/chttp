@@ -34,6 +34,6 @@ add_library(chttp include/chttp/data/GetRequest.h
         src/chttp/Router.cpp
         src/chttp/Server.cpp)
 target_link_libraries(chttp Threadpool)
-add_executable(chttpTest
+add_executable(chttpTest src/Tests/GetRequestTest.cpp
         src/test.cpp)
 target_link_libraries(chttpTest chttp)
