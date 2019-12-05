@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.9)
 project(chttp)
 
-set(CMAKE_CXX_STANDARD 14)
-
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
 include_directories(include)
@@ -16,7 +15,7 @@ add_library(chttp include/chttp/data/GetRequest.h
         include/chttp/data/HttpRequest.h
         include/chttp/data/HttpResponse.h
         include/chttp/data/PostRequest.h
-        include/chttp/util/File.h
+        include/chttp/util/MultipartField.h
         include/chttp/util/Socket.h
         include/chttp/util/Url.h
         include/chttp/Handler.h
@@ -27,7 +26,7 @@ add_library(chttp include/chttp/data/GetRequest.h
         src/chttp/data/HttpRequest.cpp
         src/chttp/data/HttpResponse.cpp
         src/chttp/data/PostRequest.cpp
-        src/chttp/util/File.cpp
+        src/chttp/util/MultipartField.cpp
         src/chttp/util/Socket.cpp
         src/chttp/util/Url.cpp
         src/chttp/Handler.cpp
@@ -35,5 +34,5 @@ add_library(chttp include/chttp/data/GetRequest.h
         src/chttp/Server.cpp)
 target_link_libraries(chttp Threadpool)
 add_executable(chttpTest
-        src/test.cpp)
+        src/test.cpp src/Tests/GetRequestTest.cpp src/Tests/GetRequestTest.h)
 target_link_libraries(chttpTest chttp)
