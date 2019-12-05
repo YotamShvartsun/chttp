@@ -3,10 +3,23 @@
 #include "chttp/data/HttpRequest.h"
 #include "chttp/data/GetRequest.h"
 #include "thirdparty/catch.hpp"
-
+#define FAIL return false;
 TEST_CASE("GetRequest can contain headers", "[GetRequest]")
 {
-
+    std::string tmp("GET / HTTP/1.1\r\nHeader:Value\r\nCookie:yo=aaaXz55==;data=rrr\r\n\r\n");
+    std::vector<char> req(tmp.begin(), tmp.end());
+    std::unordered_map<std::string, std::string> res;
+    SECTION("Creating headers from request is successful")
+    {
+        res = HttpRequest::ParseHTTPHeaders(req);
+        REQUIRE(!res.empty());
+    }
+    SECTION("Headers that are in the request are present")
+    {
+        res = HttpRequest::ParseHTTPHeaders(req);
+        REQUIRE(res.find("Header") != res.end());
+        REQUIRE(res.find("Cookie") != res.end());
+    }
 }
 
 bool HeadersTest() {
