@@ -3,51 +3,70 @@
 #include "chttp/data/HttpRequest.h"
 #include "chttp/data/GetRequest.h"
 #include "thirdparty/catch.hpp"
+
 #define FAIL return false;
-TEST_CASE("GetRequest can contain headers", "[GetRequest]")
-{
+
+TEST_CASE("GetRequest with headers", "[GetRequest][Headers]") {
     std::string tmp("GET / HTTP/1.1\r\nHeader:Value\r\nCookie:yo=aaaXz55==;data=rrr\r\n\r\n");
     std::vector<char> req(tmp.begin(), tmp.end());
     std::unordered_map<std::string, std::string> res;
-    SECTION("Creating headers from request is successful")
-    {
+    SECTION("Creating headers from request is successful") {
         res = HttpRequest::ParseHTTPHeaders(req);
         REQUIRE(!res.empty());
-    }
-    SECTION("Headers that are in the request are present")
-    {
+    }SECTION("Headers that are in the request are present") {
         res = HttpRequest::ParseHTTPHeaders(req);
         REQUIRE(res.find("Header") != res.end());
         REQUIRE(res.find("Cookie") != res.end());
+    }SECTION("Headers should have the right values") {
+        res = HttpRequest::ParseHTTPHeaders(req);
+        REQUIRE(res.at("Header") == "Value");
+        REQUIRE(res.at("Cookie") == "yo=aaaXz55==;data=rrr");
     }
 }
 
-bool HeadersTest() {
-    std::string tmp("GET / HTTP/1.1\r\nHeader:Value\r\nCookie:yo=aaaXz55==;data=rrr\r\n\r\n");
-    std::vector<char> req(tmp.begin(), tmp.end());
-    std::unordered_map<std::string, std::string> res = HttpRequest::ParseHTTPHeaders(req);
-    if (res.find("Header") == res.end() ||
-        res.find("Cookie") == res.end()) {
-        FAIL
-    }
-    if (res["Header"] != "Value" || res["Cookie"] != "yo=aaaXz55==;data=rrr") {
-        FAIL
-    }
-    std::cout << "Passed!" << std::endl;
-    std::cout << "      No headers:";
-    tmp = "GET / HTTP/1.1\r\n\r\n";
-    req = std::vector<char>(tmp.begin(), tmp.end());
-    try {
+TEST_CASE("GetRequest with no headers", "[GetRequest][Headers]") {
+    std::string tmp = "GET / HTTP/1.1\r\n\r\n";
+    std::vector<char> req = std::vector<char>(tmp.begin(), tmp.end());
+    std::unordered_map<std::string, std::string> res;
+    SECTION("Parsing with no headers dose not throw") {
+        REQUIRE_NOTHROW(res = HttpRequest::ParseHTTPHeaders(req));
+    }SECTION("Parsing with no headers dose not produce headers") {
         res = HttpRequest::ParseHTTPHeaders(req);
-        if (!res.empty()) {
-            std::cout << "Failed!" << std::endl;
-            return false;
-        }
-        std::cout << "Passed!" << std::endl;
-    } catch (std::logic_error &err) {
-        FAIL
+        REQUIRE(res.empty());
     }
-    return true;
+}
+
+TEST_CASE("Query string with values", "[GetRequest][Query]") {
+    std::string tmp;
+    std::vector<char> v;
+    SECTION("Creating request is successful") {
+        tmp = "GET /thisisnice?my=data&your=tests HTTP/1.1\r\n\r\n";
+        v = std::vector<char>(tmp.begin(), tmp.end());
+        REQUIRE_NOTHROW([&] {
+            GetRequest req(v);
+        });
+    }
+    SECTION("Request contains the query parts"){
+        tmp = "GET /thisisnice?my=data&your=tests HTTP/1.1\r\n\r\n";
+        v = std::vector<char>(tmp.begin(), tmp.end());
+        GetRequest req(v);
+        auto a = req.GetQuery();
+        REQUIRE(a.find("my") != a.end());
+        REQUIRE(a.find("your") != a.end());
+        SECTION("Request query values are right"){
+            REQUIRE(a["my"] == "data");
+            REQUIRE(a["your"] == "tests");
+        }
+    }
+}
+
+TEST_CASE("Request with no query string","[GetRequest][Query]")
+{
+    std::string tmp = "GET / HTTP/1.1\r\n\r\n";
+    std::vector<char> v(tmp.begin(), tmp.end());
+    GetRequest req(v);
+    auto a = req.GetQuery();
+    REQUIRE(a.empty());
 }
 
 bool QueryTest() {
@@ -108,16 +127,3 @@ bool NoDataTest() {
     }
 }
 
-void TestGet() {
-    bool isPassing = true;
-    std::cout << "Testing GET request: " << std::endl;
-    isPassing &= HeadersTest();
-    isPassing &= QueryTest();
-    isPassing &= UrlParamTest();
-    isPassing &= NoDataTest();
-    std::cout << "GET request test status: ";
-    if (isPassing)
-        std::cout << "\u001b[32m" << "\uF00C" << "\u001b[0m" << std::endl;
-    else
-        std::cout << "\u001b[31m" << "\uF00D" << "\u001b[0m" << std::endl;
-}
