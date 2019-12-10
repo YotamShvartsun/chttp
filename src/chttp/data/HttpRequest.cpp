@@ -167,3 +167,9 @@ std::unordered_map<std::string, std::string> HttpRequest::GetHeaders() const {
 std::map<std::string, std::string> HttpRequest::GetQuery() const {
     return this->query;
 }
+
+std::string HttpRequest::GetUrlParam(const std::string& name) const {
+    if(!this->IsInUrlParams(name))
+        throw std::runtime_error("No param named " + name);
+    return this->urlParams.at(name);
+}

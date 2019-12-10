@@ -48,7 +48,7 @@ public:
      * @note   If the name given cannot be found, it will throw std::runtime_error
      * @retval Url parameter requested
      */
-    std::string GetUrlParam(std::string) const;
+    std::string GetUrlParam(const std::string&) const;
 
     /**
      * @brief  Populate this->urlParams using the data given from Url object
