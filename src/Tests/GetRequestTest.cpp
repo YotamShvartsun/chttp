@@ -45,28 +45,62 @@ TEST_CASE("Query string with values", "[GetRequest][Query]") {
         REQUIRE_NOTHROW([&] {
             GetRequest req(v);
         });
-    }
-    SECTION("Request contains the query parts"){
+    }SECTION("Request contains the query parts") {
         tmp = "GET /thisisnice?my=data&your=tests HTTP/1.1\r\n\r\n";
         v = std::vector<char>(tmp.begin(), tmp.end());
         GetRequest req(v);
         auto a = req.GetQuery();
         REQUIRE(a.find("my") != a.end());
         REQUIRE(a.find("your") != a.end());
-        SECTION("Request query values are right"){
+        SECTION("Request query values are right") {
             REQUIRE(a["my"] == "data");
             REQUIRE(a["your"] == "tests");
         }
     }
 }
 
-TEST_CASE("Request with no query string","[GetRequest][Query]")
-{
+TEST_CASE("Request with no query string", "[GetRequest][Query]") {
     std::string tmp = "GET / HTTP/1.1\r\n\r\n";
     std::vector<char> v(tmp.begin(), tmp.end());
     GetRequest req(v);
     auto a = req.GetQuery();
     REQUIRE(a.empty());
+}
+
+TEST_CASE("No data", "[GetRequest]") {
+        std::vector<char> v;
+        REQUIRE_THROWS(GetRequest(v));
+}
+
+TEST_CASE("Url-structure based data - loading url schemes", "[GetRequest][Url]")
+{
+    // the url should be: /users/<profile>/<action>
+    std::unordered_map<int, std::string> spec;
+    spec.insert(std::make_pair(1, "profile"));
+    spec.insert(std::make_pair(2, "action"));
+    std::string base = "users";
+    Url urlTemplate(base, spec);
+    SECTION("Can parse url from a request with the url scheme")
+    {
+        std::string req("GET /users/admin/test HTTP/1.1\r\n\r\n");
+        std::vector<char> data(req.begin(), req.end());
+        GetRequest r(data);
+        r.PopulateParams(urlTemplate);
+        SECTION("Url template is parsed with the right values")
+        {
+            REQUIRE(r.IsInUrlParams("profile"));
+            REQUIRE(r.IsInUrlParams("action"));
+            REQUIRE(r.GetUrlParam("profile") == "admin");
+            REQUIRE(r.GetUrlParam("action") == "test");
+        }
+    }
+    SECTION("Not parsing url with a different scheme")
+    {
+        std::string req("GET /aaa/users/admin/test HTTP/1.1\r\n\r\n");
+        std::vector<char> data(req.begin(), req.end());
+        GetRequest r(data);
+        REQUIRE_THROWS(r.PopulateParams(urlTemplate));
+    }
 }
 
 bool QueryTest() {
