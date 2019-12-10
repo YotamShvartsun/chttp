@@ -103,6 +103,8 @@ void HttpRequest::PopulateParams(const Url& urlSpec)
 {
     std::unordered_map<int, std::string> spec = urlSpec.GetUrlParamSpec();
     std::vector<std::string> splittedUrl = SplitOptional(this->rawUrl, "/");
+    if(!urlSpec.IsMatch(this->rawUrl))
+        throw std::runtime_error("Url given dose not match to url spec");
     for (size_t i = 0; i < splittedUrl.size(); i++)
     {
         if(spec.find(i) != spec.end())
@@ -166,4 +168,10 @@ std::unordered_map<std::string, std::string> HttpRequest::GetHeaders() const {
 
 std::map<std::string, std::string> HttpRequest::GetQuery() const {
     return this->query;
+}
+
+std::string HttpRequest::GetUrlParam(const std::string& name) const {
+    if(!this->IsInUrlParams(name))
+        throw std::runtime_error("No param named " + name);
+    return this->urlParams.at(name);
 }
