@@ -5,6 +5,7 @@
 
 #ifdef __linux__
 
+#include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -19,10 +20,12 @@
 class Socket {
 private:
     bool isBinded = false;
+    socklen_t sLen;
+    struct sockaddr_in serv_addr;
     SOCKET sockfd;
     explicit Socket(SOCKET s);
 public:
-    explicit Socket();
+    Socket();
     ~Socket();
     void Bind(int port);
     void Listen();
