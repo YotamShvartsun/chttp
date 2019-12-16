@@ -25,12 +25,19 @@ Socket::Socket(SOCKET s) {
 }
 
 void Socket::Bind(int port) {
-    struct sockaddr_in serv_addr{};
-    bzero((char *) &serv_addr, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = INADDR_ANY;
-    serv_addr.sin_port = port;
-    if (bind(this->sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+    int opt = 1;
+    if (setsockopt(this->sockfd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
+                   &opt, sizeof(opt)))
+    {
+        perror("setsockopt");
+        exit(EXIT_FAILURE);
+    }
+    this->sLen = sizeof(this->serv_addr);
+    bzero((char *) &(this->serv_addr), sizeof(this->serv_addr));
+    this->serv_addr.sin_family = AF_INET;
+    this->serv_addr.sin_addr.s_addr = INADDR_ANY;
+    this->serv_addr.sin_port = htons(port);
+    if (bind(this->sockfd, (struct sockaddr *) &(this->serv_addr), sizeof(this->serv_addr)) < 0)
         throw std::runtime_error("Unable to bind");
     this->isBinded = true;
 }
@@ -42,12 +49,14 @@ void Socket::Listen() {
      * 128 is the default number in /proc/sys/net/core/somaxconn,
      * and according to `listen` man, a bigger number will change to the number in this file
      */
-    if (listen(this->sockfd, 128) < 0)
+    if (listen(this->sockfd, SOMAXCONN) < 0)
         throw std::runtime_error("Unable to listen");
 }
 
 Socket Socket::Accept() {
-    SOCKET sock = accept(this->sockfd, NULL, NULL);
+    struct sockaddr_in client_addr;
+    socklen_t client_addr_len = sizeof(struct sockaddr_in);
+    SOCKET sock = ::accept(this->sockfd, reinterpret_cast<sockaddr *>(&client_addr), &client_addr_len);
     return Socket(sock);
 }
 
