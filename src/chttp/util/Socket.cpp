@@ -15,7 +15,9 @@ Socket::Socket() {
 }
 
 Socket::~Socket() {
-    close(this->sockfd);
+    if (this->sockfd > 0) {
+        close(this->sockfd);
+    }
 }
 
 Socket::Socket(SOCKET s) {
@@ -67,6 +69,7 @@ std::vector<char> Socket::GetData(uint size) {
             std::cerr << strerror(errno) << std::endl;
 #endif
         } else if (recvCode == 0) {
+            ::close(this->sockfd);
             this->sockfd = -1;
             return res; // socket closed!
         } else {
@@ -91,10 +94,11 @@ void Socket::SendData(std::vector<char> data) {
 #ifdef DEBUG
         std::cerr << "Error on GetData. Sockfd:" << this->sockfd << " Socket object in " << std::hex << this;
         std::cerr << strerror(errno) << std::endl;
-        delete [] toSend;
-        throw std::runtime_error("Closed socket!");
+        delete[] toSend;
+        ::close(this->sockfd);
+        throw std::runtime_error("Socket error!");
 #endif
     }
 #endif
-    delete [] toSend;
+    delete[] toSend;
 }

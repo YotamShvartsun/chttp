@@ -22,7 +22,7 @@ private:
     SOCKET sockfd;
     explicit Socket(SOCKET s);
 public:
-    explicit Socket();
+    Socket();
     ~Socket();
     void Bind(int port);
     void Listen();
