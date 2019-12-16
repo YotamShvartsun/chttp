@@ -78,4 +78,23 @@ std::vector<char> Socket::GetData(uint size) {
 
 void Socket::SendData(std::vector<char> data) {
 
+    char *toSend = new char[data.size() + 1];
+    std::copy(data.begin(), data.end(), toSend);
+    if (this->sockfd < 0) {
+#ifdef DEBUG
+        std::cerr << "Trying to read from closed socket!" << std::endl;
+#endif
+        return;
+    }
+#ifdef __linux__
+    if (send(this->sockfd, toSend, data.size() + 1, 0) <= 0) {
+#ifdef DEBUG
+        std::cerr << "Error on GetData. Sockfd:" << this->sockfd << " Socket object in " << std::hex << this;
+        std::cerr << strerror(errno) << std::endl;
+        delete [] toSend;
+        throw std::runtime_error("Closed socket!");
+#endif
+    }
+#endif
+    delete [] toSend;
 }
