@@ -40,7 +40,6 @@ void Socket::Bind(int port) {
 	if (bind(this->sockfd, (struct sockaddr*) & (this->serv_addr), sizeof(this->serv_addr)) < 0)
 		throw std::runtime_error("Unable to bind");
 	this->isBinded = true;
-}
 #else
 	this->serv_addr = { 0 };
 	this->serv_addr.sin_port = htons(port);
