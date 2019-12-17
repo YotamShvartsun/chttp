@@ -8,7 +8,7 @@ Socket::Socket() {
 #ifdef __linux__
     if (this->sockfd < 0)
         throw std::runtime_error("Unable to create socket!");
-#else5
+#else
     if(this->sockfd == INVALID_SOCKET)
         throw std::runtime_error("Unable to create socket!");
 #endif
