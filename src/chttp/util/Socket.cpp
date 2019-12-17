@@ -1,14 +1,9 @@
 #include "chttp/util/Socket.h"
 #include <WinSock2.h>
-#ifdef _WIN32
-int Socket::sockCreated = 0;
-#endif // !_WIN32
 
 Socket::Socket() {
 #ifndef __linux__
 	this->serv_addr = { 0 };
-	WSADATA wd;
-	WSAStartup(MAKEWORD(2, 0), &wd);
 #endif
     this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 #ifdef __linux__
@@ -155,5 +150,5 @@ void Socket::SendData(std::vector<char> data) {
 		}
 #endif
 #endif
-    //delete[] toSend;
+    delete[] toSend;
 }

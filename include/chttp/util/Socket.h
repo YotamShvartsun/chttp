@@ -24,8 +24,6 @@ private:
     bool isBinded = false;
 #ifdef __linux__
     socklen_t sLen;
-#else
-	static int sockCreated;
 #endif
     struct sockaddr_in serv_addr;
     SOCKET sockfd;
