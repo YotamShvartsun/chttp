@@ -1,5 +1,4 @@
 #include "chttp/util/Socket.h"
-#include <WinSock2.h>
 
 Socket::Socket() {
 #ifndef __linux__
