@@ -1,6 +1,7 @@
 #include <iterator>
 #include <iostream>
 #include <fstream>
+#include <string>
 // including headers in order to stop using the std::filesystem lib, due to bug in libc++
 // this bug IS solved in gcc-9 and g++-9, but this should work with other compiler versions too
 #ifndef _WIN32
@@ -10,7 +11,7 @@
 #else
 #include <io.h>
 #include <Windows.h>
-#define access access_s
+#define access _access
 #endif
 
 #include <chttp/data/HttpResponse.h>
