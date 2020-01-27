@@ -15,4 +15,5 @@ public:
     MultipartField(std::vector<char> data, const std::string& contentType);
     const std::string &getFieldName() const;
     const std::unordered_map<std::string, std::string> &getHeaders() const;
+    std::vector<char> getData() const;
 };
