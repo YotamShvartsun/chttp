@@ -83,3 +83,7 @@ const std::string &MultipartField::getFieldName() const {
 const std::unordered_map<std::string, std::string> &MultipartField::getHeaders() const {
     return headers;
 }
+
+std::vector<char> MultipartField::getData() const {
+    return this->data;
+}
