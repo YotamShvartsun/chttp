@@ -11,20 +11,24 @@
 #include <chttp/util/Socket.h>
 #include <chttp/Router.h>
 
-class ThreadPool
-{
+class ThreadPool {
 private:
-    static ThreadPool * instance;
+    static ThreadPool *instance;
     std::mutex functionMutex;
     std::atomic_bool isPoolRunning = true;
-    std::atomic<int> numTasks;
-    ThreadPool(std::function<void(Router, Socket)> socketFunction, Router router);
+    std::atomic<int> numTasks{};
+
+    ThreadPool(const std::function<void(Router, Socket *)> &socketFunction, Router router);
+
     ~ThreadPool();
-    std::queue<Socket> clientQueue;
+
+    std::queue<Socket *> clientQueue;
     std::vector<std::thread> threads;
-    std::function<void(Socket)> socketHandler;
+    std::function<void(Socket *)> socketHandler;
 public:
-    static ThreadPool * GetInstance(std::function<void(Router, Socket)>* socketFunction, Router*);
-    void AddWork(Socket&);
+    static ThreadPool *GetInstance(std::function<void(Router, Socket *)> *socketFunction, Router *);
+
+    void AddWork(Socket *);
+
     void WaitAll();
 };

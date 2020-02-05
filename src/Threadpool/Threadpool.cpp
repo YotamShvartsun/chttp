@@ -1,15 +1,15 @@
 #include <Threapool/Threadpool.h>
 
-ThreadPool* ThreadPool::instance = 0;
+ThreadPool *ThreadPool::instance = nullptr;
 
-ThreadPool::ThreadPool(std::function<void(Router, Socket)> socketFunction, Router router) {
+ThreadPool::ThreadPool(const std::function<void(Router, Socket *)> &socketFunction, Router router) {
     using std::placeholders::_1;
     this->numTasks = 0;
     this->socketHandler = std::bind(socketFunction, router, _1);
     size_t workerNumber = std::thread::hardware_concurrency();
     auto worker = [&] {
         std::cout << "Worker up" << std::endl;
-        Socket client;
+        Socket *client;
         this->functionMutex.lock();
         this->functionMutex.unlock();
         for (;;) {
@@ -21,6 +21,7 @@ ThreadPool::ThreadPool(std::function<void(Router, Socket)> socketFunction, Route
                 this->clientQueue.pop();
                 this->functionMutex.unlock();
                 this->socketHandler(client);
+                client->Close();
                 this->numTasks--;
             } else {
                 this->functionMutex.unlock();
@@ -35,7 +36,7 @@ ThreadPool::ThreadPool(std::function<void(Router, Socket)> socketFunction, Route
 
 ThreadPool::~ThreadPool() {
     this->functionMutex.lock();
-    auto tmp = std::queue<Socket>();
+    auto tmp = std::queue<Socket *>();
     this->clientQueue.swap(tmp);
     this->functionMutex.unlock();
     this->isPoolRunning = false;
@@ -43,10 +44,9 @@ ThreadPool::~ThreadPool() {
         t.join();
 }
 
-ThreadPool *ThreadPool::GetInstance(std::function<void(Router, Socket)> *socketFunction, Router * router) {
-    if(router == nullptr || socketFunction == nullptr)
-    {
-        if(ThreadPool::instance != nullptr)
+ThreadPool *ThreadPool::GetInstance(std::function<void(Router, Socket *)> *socketFunction, Router *router) {
+    if (router == nullptr || socketFunction == nullptr) {
+        if (ThreadPool::instance != nullptr)
             return ThreadPool::instance;
         throw std::invalid_argument("Invalid arguments - Router/socketFunctions cannot be nullptr!");
     }
@@ -54,8 +54,8 @@ ThreadPool *ThreadPool::GetInstance(std::function<void(Router, Socket)> *socketF
     return ThreadPool::instance;
 }
 
-void ThreadPool::AddWork(Socket & socket) {
-    if(!this->isPoolRunning)
+void ThreadPool::AddWork(Socket *socket) {
+    if (!this->isPoolRunning)
         throw std::runtime_error("Pool not started!");
     this->functionMutex.lock();
     this->clientQueue.push(socket);
