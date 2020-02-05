@@ -70,8 +70,11 @@ PostRequest::PostRequest(std::vector<char> data) {
             boundary = "--" + boundary;
 
         }
-    }catch (std::exception & e)
-    {
+    } catch (std::exception &e) {
         this->headers["Content-Type"] = "raw";
     }
+}
+
+std::vector<char> PostRequest::GetBody() const {
+    return this->body;
 }
