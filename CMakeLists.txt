@@ -3,7 +3,8 @@ project(chttp)
 
 set(CMAKE_CXX_STANDARD 17)
 #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
-
+find_package(Threads)
+SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11 -pthread")
 include_directories(include)
 include_directories(include/chttp)
 include_directories(include/chttp/data)
@@ -33,6 +34,6 @@ add_library(chttp include/chttp/data/GetRequest.h
         src/chttp/Router.cpp
         src/chttp/Server.cpp)
 target_link_libraries(chttp Threadpool)
-add_executable(chttpTest src/Tests/GetRequestTest.cpp
+add_executable(chttpTest
         src/test.cpp)
 target_link_libraries(chttpTest chttp)
