@@ -6,18 +6,39 @@
 #include <chttp/Router.h>
 #include <Threapool/Threadpool.h>
 #include <chttp/data/HttpRequest.h>
+#include <chttp/data/HttpResponse.h>
 
+#include <signal.h>
+#include <chttp/Handler.h>
+
+ThreadPool *t;
+Socket server;
+bool IsRunning = true;
 
 enum types {
     GET, POST
 };
 
-void DoC(Router r, Socket *c) {
+void ctrlCHandler(int v) {
+    std::cout << "BYE";
+    delete t;
+    server.Close();
+    exit(0);
+}
+
+void ff(std::shared_ptr<HttpRequest> rq, std::shared_ptr<HttpResponse> rs) {
+    std::string aa = rq->GetUrlParam("number");
+    int ttt = std::stoi(aa);
+    std::string ress = std::to_string(ttt + 1);
+    rs->Raw(std::vector<char>(ress.begin(), ress.end()));
+}
+
+void DoC(Router r, std::shared_ptr<Socket> c) {
     std::vector<char> data;
     char thisChar = '\0', lastChar;
     size_t numberOfNewlines = 0;
     bool firstLine = true;
-    HttpRequest *req;
+    std::shared_ptr<HttpRequest> req;
     int type = GET;
     while (numberOfNewlines != 2) {
         lastChar = thisChar;
@@ -46,27 +67,39 @@ void DoC(Router r, Socket *c) {
         if (contentSize != body.size())
             throw std::runtime_error("Invalid post");
         data.insert(data.end(), body.begin(), body.end());
-        req = new PostRequest(data);
+        req.reset(new PostRequest(data));
     } else
-        req = new GetRequest(data);
+        req.reset(new GetRequest(data));
     //c.Close();
     std::cout << "Done serving URL: " << req->GetUrl() << std::endl;
+    std::shared_ptr<HttpResponse> res;
+    res.reset(new HttpResponse());
+    std::unordered_map<int, std::string> params;
+    params[1] = "number";
+    std::string base = "/plusOne";
+    Url url(base, params);
+    RequestHandler h(RequestType_t::GET, ff, url);
+    h(req, res);
+    c->SendData(res->Format());
 }
 
 
 int main() {
-    Router r;
-    std::function<void(Router, Socket *)> f = DoC;
-    ThreadPool *t = ThreadPool::GetInstance(&f, &r);
-    Socket server;
-    server.Bind(8080);
-    server.Listen();
-    Socket c = server.Accept();
-    t->AddWork(&c);
-    t->WaitAll();
-    Socket c1 = server.Accept();
-    t->AddWork(&c1);
-    t->WaitAll();
+//    signal(SIGINT, ctrlCHandler);
+//    signal(SIGTERM, ctrlCHandler);
+//    Router r;
+//    std::function<void(Router, std::shared_ptr<Socket>)> f = DoC;
+//    t = ThreadPool::GetInstance(&f, &r);
+//    server.Bind(8080);
+//    server.Listen();
+//    std::shared_ptr<Socket> c;
+//    int i = 0;
+//    while (1) {
+//        c = std::make_shared<Socket>(server.Accept());
+//        t->AddWork(c);
+//        i++;
+//    }
+//    t->WaitAll();
+//    server.Close();
     return 0;
 }
->>>>>>> Stashed changes

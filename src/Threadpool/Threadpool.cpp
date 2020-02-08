@@ -11,19 +11,17 @@ ThreadPool::ThreadPool(const std::function<void(Router, std::shared_ptr<Socket>)
         std::cout << "Worker up" << std::endl;
         std::shared_ptr<Socket> client;
         for (;;) {
-            if (!this->isPoolRunning)
-                return;
-            this->functionMutex.lock();
-            if (!this->clientQueue.empty()) {
+            std::unique_lock<std::mutex> gurd(this->functionMutex);
+            this->toRun.wait(gurd, [&] { return !this->isPoolRunning || !this->clientQueue.empty(); });
+            if (this->isPoolRunning) {
                 client = this->clientQueue.front();
                 this->clientQueue.pop();
                 this->functionMutex.unlock();
                 this->socketHandler(client);
                 client->Close();
-                this->numTasks--;
-            } else {
-                this->functionMutex.unlock();
-            }
+                this->numTasks--;;
+            } else
+                return;
         }
     };
     std::thread t;
@@ -39,6 +37,7 @@ ThreadPool::~ThreadPool() {
     this->clientQueue.swap(tmp);
     this->isPoolRunning = false;
     this->functionMutex.unlock();
+    this->toRun.notify_all();
 //    for(auto &t : this->threads)
 //        t.join();
     this->threads.clear();
@@ -62,13 +61,14 @@ void ThreadPool::AddWork(const std::shared_ptr<Socket> &socket) {
     this->functionMutex.lock();
     this->clientQueue.push(socket);
     this->functionMutex.unlock();
+    this->toRun.notify_one();
     this->numTasks++;
 }
 
 void ThreadPool::WaitAll() {
-    if(!this->isPoolRunning)
+    if (!this->isPoolRunning)
         return;
-    while(this->numTasks.load() > 0)
+    while (this->numTasks.load() > 0)
         std::this_thread::yield();
 }
 

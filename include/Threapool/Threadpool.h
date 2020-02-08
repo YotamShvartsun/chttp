@@ -3,6 +3,7 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <condition_variable>
 #include <queue>
 #include <vector>
 #include <functional>
@@ -11,7 +12,6 @@
 #include <chttp/util/Socket.h>
 #include <chttp/Router.h>
 
-// TODO: optimize this! use std::condition_variable (performance issues)
 
 class ThreadPool {
 private:
@@ -19,6 +19,7 @@ private:
     std::mutex functionMutex;
     std::atomic_bool isPoolRunning = true;
     std::atomic<int> numTasks{};
+    std::condition_variable toRun;
 
     ThreadPool(const std::function<void(Router, std::shared_ptr<Socket>)> &socketFunction, Router router);
 
