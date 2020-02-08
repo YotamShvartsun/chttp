@@ -85,21 +85,21 @@ void DoC(Router r, std::shared_ptr<Socket> c) {
 
 
 int main() {
-    signal(SIGINT, ctrlCHandler);
-    signal(SIGTERM, ctrlCHandler);
-    Router r;
-    std::function<void(Router, std::shared_ptr<Socket>)> f = DoC;
-    t = ThreadPool::GetInstance(&f, &r);
-    server.Bind(8080);
-    server.Listen();
-    std::shared_ptr<Socket> c;
-    int i = 0;
-    while (1) {
-        c = std::make_shared<Socket>(server.Accept());
-        t->AddWork(c);
-        i++;
-    }
-    t->WaitAll();
-    server.Close();
+//    signal(SIGINT, ctrlCHandler);
+//    signal(SIGTERM, ctrlCHandler);
+//    Router r;
+//    std::function<void(Router, std::shared_ptr<Socket>)> f = DoC;
+//    t = ThreadPool::GetInstance(&f, &r);
+//    server.Bind(8080);
+//    server.Listen();
+//    std::shared_ptr<Socket> c;
+//    int i = 0;
+//    while (1) {
+//        c = std::make_shared<Socket>(server.Accept());
+//        t->AddWork(c);
+//        i++;
+//    }
+//    t->WaitAll();
+//    server.Close();
     return 0;
 }
