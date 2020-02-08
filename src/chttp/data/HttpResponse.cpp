@@ -69,7 +69,7 @@ void HttpResponse::Raw(const std::vector<char> &data) {
 std::vector<char> HttpResponse::Format() {
     this->Header("Content-Length", std::to_string(this->payload.size()));
     std::string responseMeta =
-            "HTTP/1.1" + std::to_string(this->status) + " " + HttpResponse::HttpCodeStrings.at(this->status) + "\r\n";
+            "HTTP/1.1 " + std::to_string(this->status) + " " + HttpResponse::HttpCodeStrings.at(this->status) + "\r\n";
     std::vector<char> response;
     responseMeta += this->BuildHeaders();
     responseMeta += "\r\n";

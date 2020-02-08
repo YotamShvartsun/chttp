@@ -118,7 +118,7 @@ void HttpRequest::PopulateParams(const Url& urlSpec)
 }
 
 std::unordered_map<std::string, std::string> HttpRequest::ParseHTTPHeaders(std::vector<char> data) {
-    std::string asString(data.data());
+    std::string asString(data.begin(), data.end());
     std::vector<std::string> lines, filteredLines;
     std::unordered_map<std::string, std::string> res;
     std::size_t prev = 0, pos;

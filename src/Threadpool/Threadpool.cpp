@@ -2,16 +2,14 @@
 
 ThreadPool *ThreadPool::instance = nullptr;
 
-ThreadPool::ThreadPool(const std::function<void(Router, Socket *)> &socketFunction, Router router) {
+ThreadPool::ThreadPool(const std::function<void(Router, std::shared_ptr<Socket>)> &socketFunction, Router router) {
     using std::placeholders::_1;
     this->numTasks = 0;
     this->socketHandler = std::bind(socketFunction, router, _1);
     size_t workerNumber = std::thread::hardware_concurrency();
     auto worker = [&] {
         std::cout << "Worker up" << std::endl;
-        Socket *client;
-        this->functionMutex.lock();
-        this->functionMutex.unlock();
+        std::shared_ptr<Socket> client;
         for (;;) {
             if (!this->isPoolRunning)
                 return;
@@ -25,26 +23,30 @@ ThreadPool::ThreadPool(const std::function<void(Router, Socket *)> &socketFuncti
                 this->numTasks--;
             } else {
                 this->functionMutex.unlock();
-                std::this_thread::yield();
             }
         }
     };
+    std::thread t;
     for (int i = 0; i < workerNumber; i++) {
-        this->threads.emplace_back(std::thread(worker));
+        t = std::thread(worker);
+        this->threads.push_back(std::move(t));
     }
 }
 
 ThreadPool::~ThreadPool() {
     this->functionMutex.lock();
-    auto tmp = std::queue<Socket *>();
+    auto tmp = std::queue<std::shared_ptr<Socket>>();
     this->clientQueue.swap(tmp);
-    this->functionMutex.unlock();
     this->isPoolRunning = false;
-    for(auto & t : this->threads)
-        t.join();
+    this->functionMutex.unlock();
+//    for(auto &t : this->threads)
+//        t.join();
+    this->threads.clear();
+    this->numTasks = 0;
 }
 
-ThreadPool *ThreadPool::GetInstance(std::function<void(Router, Socket *)> *socketFunction, Router *router) {
+ThreadPool *
+ThreadPool::GetInstance(std::function<void(Router, std::shared_ptr<Socket>)> *socketFunction, Router *router) {
     if (router == nullptr || socketFunction == nullptr) {
         if (ThreadPool::instance != nullptr)
             return ThreadPool::instance;
@@ -54,7 +56,7 @@ ThreadPool *ThreadPool::GetInstance(std::function<void(Router, Socket *)> *socke
     return ThreadPool::instance;
 }
 
-void ThreadPool::AddWork(Socket *socket) {
+void ThreadPool::AddWork(const std::shared_ptr<Socket> &socket) {
     if (!this->isPoolRunning)
         throw std::runtime_error("Pool not started!");
     this->functionMutex.lock();

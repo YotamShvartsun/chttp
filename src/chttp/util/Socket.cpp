@@ -137,6 +137,7 @@ void Socket::SendData(std::vector<char> data) {
 }
 
 void Socket::Close() {
+    std::cout << __FUNCTION__ << " Called for fd:" << this->sockfd << std::endl;
     this->isBound = false;
     if (this->sockfd > 0) {
         if (::close(this->sockfd)) {

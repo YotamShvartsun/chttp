@@ -69,4 +69,8 @@ public:
      * @return map of the headers and the values
      */
     static std::unordered_map<std::string, std::string> ParseHTTPHeaders(std::vector<char> data);
+
+    enum REQUEST_TYPES {
+        GET, POST
+    };
 };
