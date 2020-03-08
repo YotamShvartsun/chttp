@@ -13,13 +13,12 @@
 #include <chttp/util/MultipartField.h>
 #include <csignal>
 
-
-void ctrlCHandler(int v) {
-  std::cout << "BYE";
-  delete t;
-  server.Close();
-  exit(0);
-}
+// void ctrlCHandler(int v) {
+//  std::cout << "BYE";
+//  delete t;
+//  server.Close();
+//  exit(0);
+//}
 
 void ff(std::shared_ptr<HttpRequest> rq, std::shared_ptr<HttpResponse> rs) {
   std::string aa = rq->GetUrlParam("number");
