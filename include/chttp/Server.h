@@ -33,7 +33,8 @@ public:
   void Get(std::string baseUrl, RequestHandlerFunction function,
            std::vector<RequestHandlerFunction> middlewares,
            std::string urlFormat = "/");
-  void Post(std::string baseUrl, RequestHandlerFunction function,
+  void Post(std::string baseUrl, const RequestHandlerFunction &function,
+            const std::vector<RequestHandlerFunction> &middlewares,
             std::string urlFormat = "/");
 
   ~Server();

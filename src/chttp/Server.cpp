@@ -101,14 +101,19 @@ void Server::Get(std::string baseUrl, RequestHandlerFunction function,
                          urlMatch);
   this->router->AddHandler(handler);
 }
-void Server::Post(std::string baseUrl,
-                  std::function<void(std::shared_ptr<HttpRequest>,
-                                     std::shared_ptr<HttpResponse>)>
-                      function,
+void Server::Post(std::string baseUrl, const RequestHandlerFunction &function,
+                  const std::vector<RequestHandlerFunction> &middlewares,
                   std::string urlFormat) {
-  auto urlFormatParser = RequestHandler::CreateParamMap(urlFormat);
-  Url urlMatch(baseUrl, urlFormatParser);
-  RequestHandler handler(RequestType_t::POST, function, urlMatch);
+  auto urlFormatParser = RequestHandler::CreateParamMap(std::move(urlFormat));
+  Url urlMatch(std::move(baseUrl), urlFormatParser);
+  RequestHandlerFunction actualFunction =
+      [middlewares, function](const std::shared_ptr<HttpRequest> &req,
+                              const std::shared_ptr<HttpResponse> &res) {
+        for (const auto &middleware : middlewares)
+          middleware(req, res);
+        function(req, res);
+      };
+  RequestHandler handler(RequestType_t::POST, actualFunction, urlMatch);
   this->router->AddHandler(handler);
 }
 Server::~Server() {
