@@ -13,5 +13,3 @@ jobs:
       run: cmake .
     - name: make
       run: make
-    - name: tests
-      run: ./chttpTest
