@@ -43,9 +43,10 @@ void Router::Route(const std::shared_ptr<HttpRequest> &req, const std::shared_pt
 }
 
 Router::Router(std::vector<RequestHandler> routes,
-               std::function<void(std::shared_ptr<HttpRequest>, std::shared_ptr<HttpResponse>)> notFoundHandler,
-               std::function<void(std::shared_ptr<HttpRequest>, std::shared_ptr<HttpResponse>,
-                                  std::string)> errorHandler) {
+               RequestHandlerFunction notFoundHandler,
+               std::function<void(std::shared_ptr<HttpRequest>,
+                                  std::shared_ptr<HttpResponse>, std::string)>
+                   errorHandler) {
     this->routes = std::move(routes);
     this->errorHandler = std::move(errorHandler);
     this->notFoundHandler = std::move(notFoundHandler);

@@ -12,6 +12,8 @@ protected:
   std::map<std::string, std::string> urlParams;
   std::map<std::string, std::string> query;
   std::unordered_map<std::string, std::string> headers;
+  // Things added by middlewares go here
+  std::unordered_map<std::string, std::string> additionalData;
 
   void BuildQuery(std::string);
 
@@ -56,6 +58,19 @@ public:
    * @retval None
    */
   void PopulateParams(const Url &);
+
+  /**
+   * Add a new item to the additional-data dictionary, created by middlewares
+   * @param key The name of the item
+   * @param value Value to set
+   */
+  void AddAdditional(std::string key, std::string value);
+  /**
+   * Retrive an item from the additional-data dictionary
+   * @param key Name of the item
+   * @return Value
+   */
+  std::string GetAdditional(const std::string &key);
 
   /**
    * @brief  Build the request from buffer

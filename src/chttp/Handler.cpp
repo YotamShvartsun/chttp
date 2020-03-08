@@ -6,8 +6,9 @@
 #include <sstream>
 
 RequestHandler::RequestHandler(RequestType_t type,
-                               std::function<void(std::shared_ptr<HttpRequest>, std::shared_ptr<HttpResponse>)> handler,
-                               const Url &urlMatch) : urlMatch(urlMatch) {
+                               RequestHandlerFunction handler,
+                               const Url &urlMatch)
+    : urlMatch(urlMatch) {
     this->requestType = type;
     this->handler = std::move(handler);
 }

@@ -16,10 +16,11 @@ private:
   std::string staticFolderPath;
   std::string staticFolderUrl;
   int port = 8080;
-  std::function<void(Router*, std::shared_ptr<Socket>)> ClientHandler = OnClient;
+  std::function<void(Router *, std::shared_ptr<Socket>)> ClientHandler =
+      OnClient;
 
-  static void OnClient(Router* router, std::shared_ptr<Socket> clientSocket);
-  std::function<void(std::shared_ptr<HttpRequest>, std::shared_ptr<HttpResponse>)> StaticFileHandler();
+  static void OnClient(Router *router, std::shared_ptr<Socket> clientSocket);
+  RequestHandlerFunction StaticFileHandler();
 
 public:
   Server();
@@ -29,14 +30,11 @@ public:
       int, std::function<void()> = [] {});
 
   void ServeStaticFolder(std::string url, std::string folderPath);
-  void Get(std::string baseUrl,
-                  std::function<void(std::shared_ptr<HttpRequest>,
-                                     std::shared_ptr<HttpResponse>)>
-               function, std::string urlFormat = "/");
-  void Post(std::string baseUrl,
-           std::function<void(std::shared_ptr<HttpRequest>,
-                              std::shared_ptr<HttpResponse>)>
-           function, std::string urlFormat = "/");
+  void Get(std::string baseUrl, RequestHandlerFunction function,
+           std::vector<RequestHandlerFunction> middlewares,
+           std::string urlFormat = "/");
+  void Post(std::string baseUrl, RequestHandlerFunction function,
+            std::string urlFormat = "/");
 
   ~Server();
 };
