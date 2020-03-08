@@ -10,6 +10,7 @@
  * @param data raw multipart data of a single file, from boundary to boundary
  */
 void MultipartField::FromMultipart(std::vector<char> data, const std::string &contentType) {
+	std::string s(data.begin(), data.end());
     // Getting the boundary:
     std::string boundary = contentType.substr(contentType.find(';') + 1);
     boundary = boundary.substr(boundary.find("boundary=") + 9);
@@ -17,8 +18,8 @@ void MultipartField::FromMultipart(std::vector<char> data, const std::string &co
     std::cout << "Boundary = " << boundary << std::endl;
 #endif
     auto start = std::search(data.begin(), data.end(), boundary.begin(), boundary.end());
-    boundary = "--" + boundary;
-    auto end = std::search(data.begin(), data.end(), boundary.begin(), boundary.end());
+//    boundary = boundary + "--";
+    auto end = std::search(start + boundary.size(), data.end(), boundary.begin(), boundary.end());
     std::vector<char> fileData(start, end);
     std::string newline("\r\n\r\n");
     auto headerEnd = std::search(fileData.begin(), fileData.end(), newline.begin(), newline.end());
@@ -42,14 +43,18 @@ void MultipartField::FromMultipart(std::vector<char> data, const std::string &co
     std::string type, hData;
     std::vector<std::string> contentDisposition;
     for (auto &header : tmpHeaders) {
+    	if(header.size() == 1)
+          continue;
         type = header.substr(0, header.find(':'));
         hData = header.substr(header.find(':'));
         if (type.find("Content-Disposition") != std::string::npos) {
-            iss = std::istringstream(type.substr(0, type.find("Content-Disposition")));
+            iss = std::istringstream(hData.substr(2));
             while (std::getline(iss, token, ';')) {
                 contentDisposition.push_back(token);
             }
             for (auto &content : contentDisposition) {
+            	if(content == "form-data")
+                  continue;
                 if(content.find("name") != std::string::npos && content.find("file") == std::string::npos)
                 {
                     this->fieldName = content.substr(content.find('='));
@@ -65,7 +70,7 @@ void MultipartField::FromMultipart(std::vector<char> data, const std::string &co
             this->headers.insert((std::make_pair(header.substr(0, header.find(':')), header.substr(header.find(':') + 1))));
         }
     }
-    this->data = std::vector<char>(headerEnd + newline.size(), fileData.end());
+    this->data = std::vector<char>(headerEnd + newline.size(), fileData.end()-4);
 #ifdef DEBUG
     for(auto & c : this->data)
         std::cout << c;

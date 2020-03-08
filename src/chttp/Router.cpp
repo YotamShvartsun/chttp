@@ -71,3 +71,9 @@ void Router::DefaultError(const std::shared_ptr<HttpRequest> &req, const std::sh
     res->SetStatus(HTTP_STATUS::Internal_Server_Error);
     res->Raw(responseBytes);
 }
+void Router::AddHandler(const RequestHandler& route) {
+  this->routes.push_back(route);
+}
+void Router::Reset() {
+  Router::instance = nullptr;
+}

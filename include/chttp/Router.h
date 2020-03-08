@@ -8,38 +8,51 @@
 
 class Router {
 private:
-    std::vector<RequestHandler> routes;
-    static Router *instance;
-    std::function<void(std::shared_ptr<HttpRequest>, std::shared_ptr<HttpResponse>)> notFoundHandler;
-    std::function<void(std::shared_ptr<HttpRequest>, std::shared_ptr<HttpResponse>, std::string)> errorHandler;
+  std::vector<RequestHandler> routes;
+  static Router *instance;
+  std::function<void(std::shared_ptr<HttpRequest>,
+                     std::shared_ptr<HttpResponse>)>
+      notFoundHandler;
+  std::function<void(std::shared_ptr<HttpRequest>,
+                     std::shared_ptr<HttpResponse>, std::string)>
+      errorHandler;
 
-    Router(std::vector<RequestHandler> routes, std::function<void(std::shared_ptr<HttpRequest>,
-                                                                  std::shared_ptr<HttpResponse>)> notFoundHandler,
-           std::function<void(std::shared_ptr<HttpRequest>, std::shared_ptr<HttpResponse>,
-                              std::string)> errorHandler
+  
+  Router(std::vector<RequestHandler> routes,
+         std::function<void(std::shared_ptr<HttpRequest>,
+                            std::shared_ptr<HttpResponse>)>
+             notFoundHandler,
+         std::function<void(std::shared_ptr<HttpRequest>,
+                            std::shared_ptr<HttpResponse>, std::string)>
+             errorHandler
 
-    );
+  );
 
-    explicit Router(std::vector<RequestHandler> routes);
+  explicit Router(std::vector<RequestHandler> routes);
 
-    static void DefaultNotFound(const std::shared_ptr<HttpRequest> &, const std::shared_ptr<HttpResponse> &);
+  static void DefaultNotFound(const std::shared_ptr<HttpRequest> &,
+                              const std::shared_ptr<HttpResponse> &);
 
-    static void
-    DefaultError(const std::shared_ptr<HttpRequest> &, const std::shared_ptr<HttpResponse> &, const std::string &);
+  static void DefaultError(const std::shared_ptr<HttpRequest> &,
+                           const std::shared_ptr<HttpResponse> &,
+                           const std::string &);
 
 public:
-    static Router *GetInstance(std::vector<RequestHandler> routes);
+  static Router *GetInstance(std::vector<RequestHandler> routes);
 
-    static Router *GetInstance();
+  static Router *GetInstance();
 
-    static Router *
-    GetInstance(const std::vector<RequestHandler> &routes, const std::function<void(std::shared_ptr<HttpRequest>,
-                                                                                    std::shared_ptr<HttpResponse>)> &notFoundHandler,
-                const std::function<void(std::shared_ptr<HttpRequest>, std::shared_ptr<HttpResponse>,
-                                         std::string)> &errorHandler
+  static Router *GetInstance(
+      const std::vector<RequestHandler> &routes,
+      const std::function<void(std::shared_ptr<HttpRequest>,
+                               std::shared_ptr<HttpResponse>)> &notFoundHandler,
+      const std::function<void(std::shared_ptr<HttpRequest>,
+                               std::shared_ptr<HttpResponse>, std::string)>
+          &errorHandler
 
-    );
-
-    void Route(const std::shared_ptr<HttpRequest> &, const std::shared_ptr<HttpResponse> &);
-
+  );
+  void AddHandler(const RequestHandler& route);
+  void Route(const std::shared_ptr<HttpRequest> &,
+             const std::shared_ptr<HttpResponse> &);
+  static void Reset();
 };

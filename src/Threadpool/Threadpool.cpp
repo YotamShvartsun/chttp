@@ -2,7 +2,7 @@
 
 ThreadPool *ThreadPool::instance = nullptr;
 
-ThreadPool::ThreadPool(const std::function<void(Router, std::shared_ptr<Socket>)> &socketFunction, Router router) {
+ThreadPool::ThreadPool(const std::function<void(Router*, std::shared_ptr<Socket>)> &socketFunction, Router* router) {
     using std::placeholders::_1;
     this->numTasks = 0;
     this->socketHandler = std::bind(socketFunction, router, _1);
@@ -45,13 +45,13 @@ ThreadPool::~ThreadPool() {
 }
 
 ThreadPool *
-ThreadPool::GetInstance(std::function<void(Router, std::shared_ptr<Socket>)> *socketFunction, Router *router) {
+ThreadPool::GetInstance(std::function<void(Router*, std::shared_ptr<Socket>)> *socketFunction, Router *router) {
     if (router == nullptr || socketFunction == nullptr) {
         if (ThreadPool::instance != nullptr)
             return ThreadPool::instance;
         throw std::invalid_argument("Invalid arguments - Router/socketFunctions cannot be nullptr!");
     }
-    ThreadPool::instance = new ThreadPool(*socketFunction, *router);
+    ThreadPool::instance = new ThreadPool(*socketFunction, router);
     return ThreadPool::instance;
 }
 
@@ -71,5 +71,6 @@ void ThreadPool::WaitAll() {
     while (this->numTasks.load() > 0)
         std::this_thread::yield();
 }
-
-
+void ThreadPool::Reset() {
+  ThreadPool::instance = nullptr;
+}

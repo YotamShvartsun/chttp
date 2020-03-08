@@ -17,6 +17,11 @@ bool Url::IsMatch(const std::string &url) const {
     afterBase += '/';
   if (this->urlParams.empty() && afterBase == "/")
     return true;
+  if (this->urlParams.find(0) != this->urlParams.end()) {
+    if (this->urlParams.at(0) == "*") {
+      return true;
+    }
+  }
   return std::count(afterBase.begin(), afterBase.end(), '/') ==
          this->urlParams.size();
 }

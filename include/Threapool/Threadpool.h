@@ -1,38 +1,41 @@
 #pragma once
 
-#include <thread>
-#include <mutex>
 #include <atomic>
 #include <condition_variable>
-#include <queue>
-#include <vector>
 #include <functional>
+#include <mutex>
+#include <queue>
 #include <stdexcept>
+#include <thread>
+#include <vector>
 
-#include <chttp/util/Socket.h>
 #include <chttp/Router.h>
-
+#include <chttp/util/Socket.h>
 
 class ThreadPool {
 private:
-    static ThreadPool *instance;
-    std::mutex functionMutex;
-    std::atomic_bool isPoolRunning = true;
-    std::atomic<int> numTasks{};
-    std::condition_variable toRun;
+  static ThreadPool *instance;
+  std::mutex functionMutex;
+  std::atomic_bool isPoolRunning = true;
+  std::atomic<int> numTasks{};
+  std::condition_variable toRun;
 
-    ThreadPool(const std::function<void(Router, std::shared_ptr<Socket>)> &socketFunction, Router router);
+  ThreadPool(const std::function<void(Router*, std::shared_ptr<Socket>)>
+                 &socketFunction,
+             Router* router);
 
+  std::queue<std::shared_ptr<Socket>> clientQueue;
+  std::vector<std::thread> threads;
+  std::function<void(std::shared_ptr<Socket>)> socketHandler;
 
-    std::queue<std::shared_ptr<Socket>> clientQueue;
-    std::vector<std::thread> threads;
-    std::function<void(std::shared_ptr<Socket>)> socketHandler;
 public:
-    static ThreadPool *GetInstance(std::function<void(Router, std::shared_ptr<Socket>)> *socketFunction, Router *);
+  static ThreadPool *GetInstance(
+      std::function<void(Router*, std::shared_ptr<Socket>)> *socketFunction,
+      Router *);
+  static void Reset();
+  void AddWork(const std::shared_ptr<Socket> &);
 
-    void AddWork(const std::shared_ptr<Socket> &);
+  void WaitAll();
 
-    void WaitAll();
-
-    ~ThreadPool();
+  ~ThreadPool();
 };

@@ -27,4 +27,6 @@ public:
     bool IsMatching(const std::shared_ptr<HttpRequest> &) const;
 
     void operator()(const std::shared_ptr<HttpRequest> &, std::shared_ptr<HttpResponse>);
+
+    static std::unordered_map<int, std::string> CreateParamMap(std::string);
 };
