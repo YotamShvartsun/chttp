@@ -13,16 +13,12 @@
 #include <chttp/util/MultipartField.h>
 #include <csignal>
 
-ThreadPool *t;
-Socket server;
-bool IsRunning = true;
-
-void ctrlCHandler(int v) {
-  std::cout << "BYE";
-  delete t;
-  server.Close();
-  exit(0);
-}
+// void ctrlCHandler(int v) {
+//  std::cout << "BYE";
+//  delete t;
+//  server.Close();
+//  exit(0);
+//}
 
 void ff(std::shared_ptr<HttpRequest> rq, std::shared_ptr<HttpResponse> rs) {
   std::string aa = rq->GetUrlParam("number");
@@ -79,14 +75,19 @@ void fff(std::shared_ptr<HttpRequest> rq, std::shared_ptr<HttpResponse> rs) {
   rs->SetStatus(HTTP_STATUS::OK);
 }
 
-void f(std::shared_ptr<HttpRequest> rq, std::shared_ptr<HttpResponse> rs){
-  auto b = ((PostRequest*)rq.get())->GetBody();
+void f(std::shared_ptr<HttpRequest> rq, std::shared_ptr<HttpResponse> rs) {
+  auto b = ((PostRequest *)rq.get())->GetBody();
   auto ct = rq->GetHeaders()["Content-Type"];
   MultipartField mp(b, ct);
   auto be = b.begin() + mp.getData().size();
   std::vector<char> vv(be, b.end());
   MultipartField pp(vv, ct);
   rs->Raw(mp.getData());
+}
+
+void printURL(std::shared_ptr<HttpRequest> rq,
+              std::shared_ptr<HttpResponse> rs) {
+  std::cout << rq->GetUrl() << std::endl;
 }
 
 int main() {
@@ -111,9 +112,10 @@ int main() {
   //    server.Close();
   //    return 0;
   Server server;
-  server.Get("/", fff, "/");
-  server.Get("/", ff, "/:number");
-  server.Post("/", f);
+  std::vector<RequestHandlerFunction> v{printURL};
+  server.Get("/", fff, v, "/");
+  server.Get("/", ff, {}, "/:number");
+  server.Post("/", f, {});
   server.ServeStaticFolder("/static", "/home/themiper/");
   server.Run(8080, [] { std::cout << "Server up" << std::endl; });
   return 0;
