@@ -16,7 +16,7 @@ class ThreadPool {
 private:
   static ThreadPool *instance;
   std::mutex functionMutex;
-  std::atomic_bool isPoolRunning = true;
+  std::atomic_bool isPoolRunning{true};
   std::atomic<int> numTasks{};
   std::condition_variable toRun;
 
