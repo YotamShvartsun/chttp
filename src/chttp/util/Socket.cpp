@@ -12,10 +12,11 @@
  */
 #include <chttp/util/Socket.h>
 
+#include <string>
 #ifdef DEBUG
-
+#ifndef _WIN32
 #include <arpa/inet.h> // in order to print the IP address of a client
-
+#endif
 #endif
 
 // constructor
@@ -68,22 +69,32 @@ void Socket::Bind(int port) {
   // The SO_REUSEADDR | SO_REUSEPORT allows the socket to bind an address in
   // time-wait state. Allows a TCP socket to use an address which was used by
   // another (killed) process.
+#ifndef _WIN32
   if (setsockopt(this->sockfd, SOL_SOCKET,
-                 SO_REUSEADDR | SO_REUSEPORT, // NOLINT
-                 &optionValue, sizeof(optionValue)) != 0) {
-    throw std::system_error(errno, std::system_category(),
-                            "Unable to setup socket!");
+	  SO_REUSEADDR | SO_REUSEPORT, // NOLINT
+	  &optionValue, sizeof(optionValue)) != 0) {
+	  throw std::system_error(errno, std::system_category(),
+		  "Unable to setup socket!");
   }
   // make sure that this->server_addr is clean - all data in it is ours.
-  bzero((char *)&(this->server_addr), sizeof(this->server_addr));
+  bzero((char*) & (this->server_addr), sizeof(this->server_addr));
   this->server_addr.sin_family = AF_INET;
   this->server_addr.sin_addr.s_addr = INADDR_ANY;
   this->server_addr.sin_port =
-      htons(port); // parse host-byte order to network-byte order
+	  htons(port); // parse host-byte order to network-byte order
 
-  if (bind(this->sockfd, (struct sockaddr *)&(this->server_addr),
-           sizeof(this->server_addr)) < 0)
-    throw std::system_error(errno, std::system_category(), "Unable to bind");
+  if (bind(this->sockfd, (struct sockaddr*) & (this->server_addr),
+	  sizeof(this->server_addr)) < 0)
+	  throw std::system_error(errno, std::system_category(), "Unable to bind");
+#else
+  if (setsockopt(this->sockfd, SOL_SOCKET,
+	  SO_REUSEADDR, // NOLINT
+	  (char*)&optionValue, sizeof(optionValue)) != 0) {
+	  throw std::system_error(errno, std::system_category(),
+		  "Unable to setup socket!");
+  }
+
+#endif // !_WIN32
   this->isBound = true;
 }
 

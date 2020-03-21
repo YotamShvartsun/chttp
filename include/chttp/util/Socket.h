@@ -19,12 +19,20 @@
 #include <vector>
 
 #include <atomic>
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <winsock2.h>
+#include <Ws2tcpip.h>
+#else
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-
 #define SOCKET int
+#endif // _WIN32
+
 
 /**
  * This class is a RAII wrapper for a TCP socket
