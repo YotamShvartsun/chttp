@@ -40,6 +40,10 @@
  */
 class Socket {
 private:
+#ifdef _WIN32
+	static bool ShouldCallWSAStartup;
+#endif // _WIN32
+
   /**
    * Number of references to this object. When it points to 0, the socket will
    * be closed Whenever an object is copied, the value will increase.
@@ -127,7 +131,7 @@ public:
    * @throws runtime_error If the socket is closed
    * @throws system_error If the ::recv syscall fails
    */
-  std::vector<char> GetData(uint maxBufferSize);
+  std::vector<char> GetData(unsigned int maxBufferSize);
 
   /**
    * Send data using the socket object

@@ -19,8 +19,24 @@
 #endif
 #endif
 
+#ifdef _WIN32
+bool Socket::ShouldCallWSAStartup = true;
+#endif
+
 // constructor
 Socket::Socket() : referenceCount() {
+#ifdef _WIN32
+	if (Socket::ShouldCallWSAStartup)
+	{
+		WSADATA ws;
+		if (WSAStartup(MAKEWORD(2, 2), &ws) != NO_ERROR) {
+			wprintf(L"Error at WSAStartup()\n");
+			exit(-1);
+		}
+		Socket::ShouldCallWSAStartup = false;
+	}
+#endif // _WIN32
+
   this->referenceCount.store(new int(1));
   this->sockfd =
       ::socket(AF_INET, SOCK_STREAM, 0); // create the file descriptor
@@ -89,11 +105,16 @@ void Socket::Bind(int port) {
 #else
   if (setsockopt(this->sockfd, SOL_SOCKET,
 	  SO_REUSEADDR, // NOLINT
-	  (char*)&optionValue, sizeof(optionValue)) != 0) {
+	  (char*)&optionValue, sizeof(optionValue)) == SOCKET_ERROR) {
 	  throw std::system_error(errno, std::system_category(),
 		  "Unable to setup socket!");
   }
-
+  this->server_addr = { 0 };
+  this->server_addr.sin_port = htons(port);
+  this->server_addr.sin_family = AF_INET;
+  this->server_addr.sin_addr.s_addr = INADDR_ANY;
+  if (::bind(this->sockfd, (struct sockaddr*) & (this->server_addr), sizeof(this->server_addr)) == SOCKET_ERROR)
+	  throw std::runtime_error("Unable to bind");
 #endif // !_WIN32
   this->isBound = true;
 }
@@ -136,7 +157,7 @@ Socket Socket::Accept() {
 }
 
 // maxBufferSize define the max reading buffer maxBufferSize
-std::vector<char> Socket::GetData(uint maxBufferSize) {
+std::vector<char> Socket::GetData(unsigned int maxBufferSize) {
   std::vector<char> res;
   if (maxBufferSize == 0) // if requesting to read 0 bytes, return empty array
     return res;
@@ -176,13 +197,24 @@ void Socket::SendData(std::vector<char> data) {
 
 void Socket::Close() {
   this->isBound = false;
+#ifndef _WIN32
   if (this->sockfd > 0) {
-    if (::close(this->sockfd)) {
-      // handle errors
-      this->sockfd = -1;
-      throw std::system_error(errno, std::system_category(),
-                              "Unable to close socket");
-    }
-    this->sockfd = -1;
+	  if (::close(this->sockfd)) {
+		  // handle errors
+		  this->sockfd = -1;
+		  throw std::system_error(errno, std::system_category(),
+			  "Unable to close socket");
+	  }
+	  this->sockfd = -1;
+}
+#else
+  if (this->sockfd != INVALID_SOCKET) {
+	  if (::closesocket(this->sockfd)) {
+		  this->sockfd = INVALID_SOCKET;
+		  throw std::system_error(errno, std::system_category(),
+			  "Unable to close socket");
+	  }
   }
+  this->sockfd = INVALID_SOCKET;
+#endif // !_WIN32
 }
