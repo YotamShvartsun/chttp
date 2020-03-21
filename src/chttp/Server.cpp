@@ -11,7 +11,7 @@ void Server::OnClient(Router *router, std::shared_ptr<Socket> clientSocket) {
     lastChar = thisChar;
     thisChar = clientSocket->GetData(1)[0];
     data.push_back(thisChar);
-    if (lastChar == '\r' and thisChar == '\n') {
+    if (lastChar == '\r' && thisChar == '\n') {
       numberOfNewlines++;
       if (firstLine) {
         firstLine = false;

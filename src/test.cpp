@@ -38,7 +38,7 @@ void DoC(Router r, std::shared_ptr<Socket> c) {
     lastChar = thisChar;
     thisChar = c->GetData(1)[0];
     data.push_back(thisChar);
-    if (lastChar == '\r' and thisChar == '\n') {
+    if (lastChar == '\r' && thisChar == '\n') {
       numberOfNewlines++;
       if (firstLine) {
         firstLine = false;

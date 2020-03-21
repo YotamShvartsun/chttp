@@ -10,11 +10,11 @@
 #else
 #include <io.h>
 #include <Windows.h>
-#define access access_s
+#define access _access_s
 #endif
 
 #include <chttp/data/HttpResponse.h>
-
+#include <string>
 
 /**
  * Check if file in path exists
