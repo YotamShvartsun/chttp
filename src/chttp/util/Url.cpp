@@ -13,7 +13,7 @@ bool Url::IsMatch(const std::string &url) const {
   if (url.find(this->baseURL) == std::string::npos)
     return false;
   std::string afterBase = url.substr(url.find(this->baseURL) + 1);
-  if (afterBase.back() != '/')
+  if (afterBase.empty() ||afterBase.back() != '/')
     afterBase += '/';
   if (this->urlParams.empty() && afterBase == "/")
     return true;

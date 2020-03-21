@@ -16,7 +16,7 @@ ThreadPool::ThreadPool(const std::function<void(Router*, std::shared_ptr<Socket>
             if (this->isPoolRunning) {
                 client = this->clientQueue.front();
                 this->clientQueue.pop();
-                this->functionMutex.unlock();
+				gurd.unlock();
                 this->socketHandler(client);
                 client->Close();
                 this->numTasks--;;
