@@ -25,6 +25,7 @@
 #endif
 #include <winsock2.h>
 #include <Ws2tcpip.h>
+#pragma comment(lib, "Ws2_32.lib")
 #else
 #include <netinet/in.h>
 #include <sys/socket.h>
