@@ -1,6 +1,12 @@
 #include <chttp/Server.h>
 
-void Server::OnClient(Router *router, std::shared_ptr<Socket> clientSocket) {
+#ifdef __linux__
+#include <climits>
+#include <cstdlib>
+#endif
+
+void Server::OnClient(Router *router,
+                      const std::shared_ptr<Socket> &clientSocket) {
   std::vector<char> data;
   char thisChar = '\0', lastChar;
   size_t numberOfNewlines = 0;
@@ -9,7 +15,11 @@ void Server::OnClient(Router *router, std::shared_ptr<Socket> clientSocket) {
   RequestType_t type = RequestType_t::GET;
   while (numberOfNewlines != 2) {
     lastChar = thisChar;
-    thisChar = clientSocket->GetData(1)[0];
+    try {
+      thisChar = clientSocket->GetData(1)[0];
+    } catch (std::runtime_error &) {
+      return;
+    }
     data.push_back(thisChar);
     if (lastChar == '\r' && thisChar == '\n') {
       numberOfNewlines++;
@@ -49,9 +59,9 @@ Server::StaticFileHandler() {
                 const std::shared_ptr<HttpResponse> &response) {
     std::string requestUrl = request->GetUrl();
     std::string filePath =
-        this->staticFolderPath +
+        this->staticFolderPath + '/' +
         requestUrl.substr(requestUrl.find(this->staticFolderUrl) +
-                          this->staticFolderUrl.size() + 1);
+                          this->staticFolderUrl.size());
     response->SendFile(filePath);
   };
 }
@@ -77,6 +87,16 @@ void Server::Run(int port = 8080, std::function<void()> onStart) {
 }
 void Server::ServeStaticFolder(std::string url, std::string folderPath) {
   this->staticFolderUrl = url;
+#ifdef __linux__
+  char *pathBuffer = const_cast<char *>(folderPath.c_str());
+  char *absolutePath[PATH_MAX + 1] = {0};
+  char *ptr = realpath(pathBuffer, reinterpret_cast<char *>(absolutePath));
+  if (ptr == 0) {
+    std::cerr << "Directory " << folderPath << " not found!" << std::endl;
+    exit(1);
+  }
+  folderPath = std::string(ptr);
+#endif
   this->staticFolderPath = folderPath;
   std::unordered_map<int, std::string> matchAll;
   matchAll[0] = "*";

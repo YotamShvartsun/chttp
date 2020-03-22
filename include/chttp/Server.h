@@ -19,7 +19,8 @@ private:
   std::function<void(Router *, std::shared_ptr<Socket>)> ClientHandler =
       OnClient;
 
-  static void OnClient(Router *router, std::shared_ptr<Socket> clientSocket);
+  static void OnClient(Router *router,
+                       const std::shared_ptr<Socket> &clientSocket);
   RequestHandlerFunction StaticFileHandler();
 
 public:
