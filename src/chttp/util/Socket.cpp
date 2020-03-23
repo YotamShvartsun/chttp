@@ -10,6 +10,7 @@
  * @note Since this is a part of a server framework, this class will not support
  * any type of client side operations (`connect`, .etc).
  */
+#define DEBUG
 #include <chttp/util/Socket.h>
 
 #include <string>
@@ -217,4 +218,11 @@ void Socket::Close() {
   }
   this->sockfd = INVALID_SOCKET;
 #endif // !_WIN32
+}
+bool Socket::IsClosed() const {
+#ifdef _WIN32
+  return this->sockfd == INVALID_SOCKET;
+#else
+  return this->sockfd == -1;
+#endif
 }

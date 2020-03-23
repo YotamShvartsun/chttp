@@ -13,6 +13,6 @@ int main(int argc, char **argv) {
   int port = 8080;
   Server app;
   app.Post("/form", form, {});
-  app.ServeStaticFolder("/", "../examples/public/");
+  app.ServeStaticFolder("/", "/home/themiper/chttp/examples/public/");
   app.Run(port);
 }

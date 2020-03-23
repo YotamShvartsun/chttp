@@ -1,80 +1,60 @@
-#include <vector>
+/**
+ * @file
+ * @author Yotam Shvartsun <yotam.shvartsun@gmail.com>
+ * @version 1.0
+ * @section DESCRIPTION
+ * This file contains the implementation of the PostRequest class
+ */
+#include <algorithm>
 #include <chttp/data/PostRequest.h>
 #include <chttp/util/MultipartField.h>
-#include <algorithm>
+#include <vector>
 
 void PostRequest::FromString(std::vector<char> data) {
-    std::size_t firstSpace = 0;
-    std::size_t lastSpace = 0;
-    std::string asString(data.begin(), data.end());
-    std::string firstLine = asString.substr(0, asString.find("\r\n")); // METHOD URL PROTO
-    if (firstLine.find("POST") == std::string::npos) // make sure this is a GET request
-    {
-        throw std::runtime_error("Request is not a valid POST request!");
-    }
-    // Get the url
-    firstSpace = firstLine.find_first_of(' ');
-    lastSpace = firstLine.find_last_of(' ') - 1;
-    if (firstSpace != std::string::npos) {
-        this->rawUrl = firstLine.substr(firstSpace + 1, lastSpace - firstSpace);
-    } else {
+  std::size_t firstSpace = 0;
+  std::size_t lastSpace = 0;
+  std::string asString(data.begin(), data.end());
+  std::string firstLine = asString.substr(0, asString.find("\r\n"));
+  // A post request must contain "POST" in the request line (aka first line)
+  if (firstLine.find("POST") == std::string::npos) {
+    throw std::runtime_error("Request is not a valid POST request!");
+  }
+  // Get the url
+  firstSpace = firstLine.find_first_of(' ');
+  lastSpace = firstLine.find_last_of(' ') - 1;
+  if (firstSpace != std::string::npos) {
+    this->rawUrl = firstLine.substr(firstSpace + 1, lastSpace - firstSpace);
+  } else {
+    throw std::runtime_error("Request is not a valid HTTP request!");
+  }
+  this->BuildQuery(rawUrl);
+  // Parse the headers
+  std::size_t headersEnd = asString.find("\r\n\r\n");
+  std::string headers =
+      asString.substr(firstLine.length(), headersEnd - firstLine.length());
+  std::vector<char> tmp(headers.begin(), headers.end());
+  this->headers = HttpRequest::ParseHTTPHeaders(tmp);
+  try {
+    // Parse the body
+    long bodySize = std::stol(this->headers.at("Content-Length"));
+    std::string bodyString = asString.substr(headersEnd + 4, bodySize);
+    this->body = std::vector<char>(bodyString.begin(), bodyString.end());
+  } catch (std::exception &e) {
 #ifdef DEBUG
-        std::cerr << "Request does not match the HTTP request format" << firstLine << std::endl;
+    std::cerr << "POST: " << e.what() << std::endl;
 #endif
-        throw std::runtime_error("Request is not a valid HTTP request!");
-    }
-    this->BuildQuery(rawUrl);
-    std::size_t headersEnd = asString.find("\r\n\r\n");
-    std::string headers = asString.substr(firstLine.length(), headersEnd - firstLine.length());
-#ifdef DEBUG
-    std::cout << "Headers: " << std::endl << headers << std::endl;
-#endif
-    std::vector<char> tmp(headers.begin(), headers.end());
-    this->headers = HttpRequest::ParseHTTPHeaders(tmp);
-    try {
-        long bodySize = std::stol(this->headers.at("Content-Length"));
-        std::string body = asString.substr(headersEnd + 4, bodySize);
-        this->body = std::vector<char>(body.begin(), body.end());
-    }catch (std::exception& e)
-    {
-#ifdef DEBUG
-        std::cerr << "POST: " << e.what() << std::endl;
-#endif
-    }
-#ifdef DEBUG
-    for(auto x: this->body)
-    {
-        std::cout<<x;
-    }
-#endif
+  }
 }
 
-PostRequest &PostRequest::operator=(const PostRequest & other) {
-    std::copy(other.rawUrl.begin(), other.rawUrl.end(), this->rawUrl.begin());
-    this->query = other.query;
-    this->headers = other.headers;
-    this->urlParams = other.urlParams;
-    return *this;
+PostRequest &PostRequest::operator=(const PostRequest &other) {
+  // deep copy the body
+  std::copy(other.rawUrl.begin(), other.rawUrl.end(), this->rawUrl.begin());
+  this->query = other.query;
+  this->headers = other.headers;
+  this->urlParams = other.urlParams;
+  return *this;
 }
 
-PostRequest::PostRequest(std::vector<char> data) {
-    this->FromString(data);
-    try {
-        if (this->headers.at("Content-Type").find("multipart") != std::string::npos)
-        {
-            std::string bodyString(this->body.begin(), this->body.end());
-            std::size_t lastNewline = 0;
-            std::string contentType = this->headers.at("Content-Type");
-            std::string boundary = contentType.substr(contentType.find(';') + 1);
-            boundary = boundary.substr(boundary.find("boundary=") + 9);
-            boundary = "--" + boundary;
+PostRequest::PostRequest(std::vector<char> data) { this->FromString(data); }
 
-        }
-    } catch (std::exception &e) {
-        this->headers["Content-Type"] = "raw";
-    }
-}
-
-std::vector<char> PostRequest::GetBody() const {
-    return this->body;
-}
+std::vector<char> PostRequest::GetBody() const { return this->body; }

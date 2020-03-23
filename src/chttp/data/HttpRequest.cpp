@@ -1,3 +1,11 @@
+/**
+ * @file
+ * @author Yotam Shvartsun <yotam.shvartsun@gmail.com>
+ * @version 1.0
+ * @section DESCRIPTION
+ * This file contains the implementation of the HttpRequest non-virtual functions
+ * In this file there are also helper functions used by the CHttp library, in order to preform repetetive string relaeted actions
+*/
 #include <chttp/data/HttpRequest.h>
 #include <sstream>
 #include <utility>
@@ -5,11 +13,11 @@
 HttpRequest::HttpRequest() = default;
 
 /**
- * splits data to two parts: everything before del and everything after it
- * @throws error when data doesn't contain del
- * @param data
- * @param del
- * @return vector
+ * Splits data to two parts: everything before del and everything after it
+ * @throws std::out_of_range when data doesn't contain del
+ * @param data string to split
+ * @param del delimiter to split by
+ * @return The splitted string
  */
 std::vector<std::string> SplitOnce(std::string &data, const std::string &del) {
     std::string tmp = data.substr(0, data.find(del, 0));
@@ -21,10 +29,9 @@ std::vector<std::string> SplitOnce(std::string &data, const std::string &del) {
 
 /**
  * @brief  Splits string using one of the delimiters given in
- * @note   this is not a part of HttpRequest, just a helper function
  * @param  data: data to split
  * @param  delimiters: optional delimiters to split by
- * @retval Splitted data
+ * @return Splitted data
  */
 std::vector<std::string> SplitOptional(std::string &data, const std::string &delimiters)
 {
@@ -59,18 +66,22 @@ void HttpRequest::BuildQuery(std::string url)
 
     urlSplitted = SplitOptional(url, "?");
     queryRaw = urlSplitted.back();
+    // Remove the fragment from the url
     fragmentPos = queryRaw.find('#');
     if (fragmentPos != std::string::npos)
     {
         queryRaw.erase(fragmentPos);
     }
-// remove the fragment part from the url (its not )
 #ifdef DEBUG
     std::cout << "Url raw query string: " << queryRaw << std::endl;
 #endif
+    // split the query using the delimiters of a query string
+    //! @note that the query string is defined as everything between the ? to a # or the end of the url
+    //! @see <a href="https://tools.ietf.org/html/rfc3986#section-3.4">RFC 3986, section 3.4</a>
     querySplitted = SplitOptional(queryRaw, "&;");
     if (querySplitted.size() == 1 && querySplitted[0] == queryRaw)
         return;
+
     for (auto &queryPart : querySplitted)
     {
         //! note that = is not allowed as part of the query data (for example, this url is not allowed: /base/page?p1=a==)
@@ -102,10 +113,12 @@ std::string HttpRequest::GetUrl() const
 
 void HttpRequest::PopulateParams(const Url& urlSpec)
 {
+	// If the url dose not match the template, throw an error and stop
+	if(!urlSpec.IsMatch(this->rawUrl))
+		throw std::runtime_error("Url given dose not match to url spec");
+
     std::unordered_map<int, std::string> spec = urlSpec.GetUrlParamSpec();
     std::vector<std::string> splittedUrl = SplitOptional(this->rawUrl, "/");
-    if(!urlSpec.IsMatch(this->rawUrl))
-        throw std::runtime_error("Url given dose not match to url spec");
     for (size_t i = 0; i < splittedUrl.size(); i++)
     {
         if(spec.find(i) != spec.end())
@@ -123,6 +136,7 @@ std::unordered_map<std::string, std::string> HttpRequest::ParseHTTPHeaders(std::
     std::vector<std::string> lines, filteredLines;
     std::unordered_map<std::string, std::string> res;
     std::size_t prev = 0, pos;
+    // Split the request to lines
     while ((pos = asString.find("\r\n", prev)) != std::string::npos) {
         if (asString[prev] == '\n') {
             prev++;
@@ -131,6 +145,7 @@ std::unordered_map<std::string, std::string> HttpRequest::ParseHTTPHeaders(std::
             lines.push_back(asString.substr(prev, pos - prev));
         prev = pos + 1;
     }
+    // also include the last line
     if (prev < asString.length())
         lines.push_back(asString.substr(prev, std::string::npos));
 #ifdef DEBUG
@@ -152,6 +167,10 @@ std::unordered_map<std::string, std::string> HttpRequest::ParseHTTPHeaders(std::
 #endif
     std::vector<std::string> tmp;
     for (auto &l : filteredLines) {
+    	/**
+    	 * A valid HTTP header must have a colon in it, which seperates between the field name and the value
+    	 * @see <a href="https://tools.ietf.org/html/rfc2616#section-4.2">RFC 2616, section 4.2</a>
+    	 */
         tmp = SplitOnce(l, ":");
         res.insert(std::make_pair(tmp.front(), tmp.back()));
     }
@@ -172,8 +191,8 @@ std::map<std::string, std::string> HttpRequest::GetQuery() const {
 }
 
 std::string HttpRequest::GetUrlParam(const std::string &name) const {
-  if (!this->IsInUrlParams(name))
-    throw std::runtime_error("No param named " + name);
+  if (!this->IsInUrlParams(name)) // if the parameter is not in the list, throw runtime error instead of the out_of_range
+    throw std::runtime_error("Parameter named " + name + " was not found in the url");
   return this->urlParams.at(name);
 }
 void HttpRequest::AddAdditional(std::string key, std::string value) {

@@ -1,3 +1,10 @@
+/**
+ * @file
+ * @author Yotam Shvartsun <yotam.shvartsun@gmail.com>
+ * @version 1.0
+ * @section DESCRIPTION
+ * This file contains the implementation of the GetRequest class
+*/
 #include "chttp/data/GetRequest.h"
 
 #include <sstream>

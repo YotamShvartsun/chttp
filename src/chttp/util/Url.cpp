@@ -12,6 +12,8 @@ Url::Url(std::string baseUrl, std::unordered_map<int, std::string> &spec) {
 bool Url::IsMatch(const std::string &url) const {
   if (url.find(this->baseURL) == std::string::npos)
     return false;
+  if(url == this->baseURL && this->urlParams.empty())
+    return true;
   std::string afterBase = url.substr(url.find(this->baseURL) + 1);
   if (afterBase.empty() ||afterBase.back() != '/')
     afterBase += '/';

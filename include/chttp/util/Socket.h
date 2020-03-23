@@ -50,7 +50,7 @@ private:
    */
   std::atomic<int *> referenceCount;
   /**
-   * hold wheather the Socket object is bound or not.
+   * Holds whether the Socket object is bound or not.
    * Changes to true when calling the Socket::Bind function and to false on
    * Socket::Close
    */
@@ -140,4 +140,6 @@ public:
    * @throws runtime_error If the socket is closed
    */
   void SendData(std::vector<char> data);
+
+  bool IsClosed() const;
 };

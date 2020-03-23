@@ -23,7 +23,7 @@ add_library(chttp SHARED
         src/chttp/util/MultipartField.cpp
         src/chttp/util/Socket.cpp
         src/chttp/util/Url.cpp
-        src/chttp/Handler.cpp
+        src/chttp/RequestHandler.cpp
         src/chttp/Router.cpp
         src/chttp/Server.cpp)
 
@@ -34,7 +34,6 @@ target_include_directories(chttp PRIVATE include/chttp/data)
 target_include_directories(chttp PRIVATE include/Threapool)
 target_include_directories(chttp PRIVATE src)
 set_target_properties(chttp PROPERTIES VERSION ${PROJECT_VERSION})
-#set_target_properties(chttp PROPERTIES PUBLIC_HEADER "include/chttp/CHttp.h;include/chttp/data/GetRequest.h;include/chttp/data/HttpRequest.h;include/chttp/data/HttpResponse.h;include/chttp/data/PostRequest.h;include/chttp/util/MultipartField.h;include/chttp/util/Socket.h;include/chttp/util/Url.h;include/chttp/Handler.h;include/chttp/Router.h;include/chttp/Server.h")
 
 configure_file(chttp.pc.in chttp.pc @ONLY)
 
