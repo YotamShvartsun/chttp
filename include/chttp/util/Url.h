@@ -18,12 +18,10 @@
  */
 class Url {
 private:
-  //  std::string baseURL;
   std::unordered_map<int, std::string> mustBe;
   std::unordered_map<int, std::string> parameters;
 
 public:
-  Url(std::string baseUrl, std::unordered_map<int, std::string> &spec);
   Url(std::string urlTemplate);
   /**
    * @brief  Checks if url given matches the baseURL of this instance

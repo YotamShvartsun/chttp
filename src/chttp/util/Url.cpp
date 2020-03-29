@@ -5,29 +5,6 @@
 #include <string>
 #include <utility>
 
-Url::Url(std::string baseUrl, std::unordered_map<int, std::string> &spec) {
-  this->baseURL = std::move(baseUrl);
-  this->parameters = spec;
-}
-
-bool Url::IsMatch(const std::string &url) const {
-  if (url.find(this->baseURL) == std::string::npos)
-    return false;
-  if (url == this->baseURL && this->parameters.empty())
-    return true;
-  std::string afterBase = url.substr(url.find(this->baseURL) + 1);
-  if (afterBase.empty() || afterBase.back() != '/')
-    afterBase += '/';
-  if (this->parameters.empty() && afterBase == "/")
-    return true;
-  if (this->parameters.find(0) != this->parameters.end()) {
-    if (this->parameters.at(0) == "*") {
-      return true;
-    }
-  }
-  return std::count(afterBase.begin(), afterBase.end(), '/') ==
-         this->parameters.size();
-}
 
 std::unordered_map<int, std::string> Url::GetUrlParamSpec() const {
   return this->parameters;
@@ -39,11 +16,47 @@ Url::Url(std::string urlTemplate) {
   int i = 0;
   while (std::getline(iss, item, '/')) {
     if (item[0] == ':') {
-      this->parameters[i] = item.substr(1);
-    }
-    else {
-      this->mustBe[i] = item;
+      if (item != ":*") {
+        this->parameters[i] = item.substr(1);
+      } else {
+        this->parameters[-1] = "*";
+      }
+    } else {
+      if (item != "") {
+        this->mustBe[i] = item;
+      }
     }
     i++;
   }
+}
+bool Url::IsMatch(const std::string &url) const {
+  std::string urlTmp = url.substr(1);
+  if (urlTmp.empty()) {
+    return this->mustBe.empty() && this->parameters.empty();
+  }
+  bool checkOnlyBase = this->parameters.find(-1) != this->parameters.end();
+  std::stringstream asStream(urlTmp);
+  std::string part;
+  int idx = 0;
+  int paramsToEnter = this->parameters.size();
+  while (std::getline(asStream, part, '/')) {
+    if (!checkOnlyBase &&
+        this->parameters.find(idx) != this->parameters.end()) {
+      paramsToEnter--;
+    } else {
+      if (this->mustBe.find(idx) != this->mustBe.end()) {
+        if (this->mustBe.at(idx) != part) {
+          return false; // this means that the url doesnt fit the template, it
+                        // must fit to the given value!
+        }
+      } else {
+        if (!checkOnlyBase) {
+          return false; // The url is longer then the template!
+        }
+      }
+    }
+    idx++;
+  }
+  // If all parameters were given value, the url is valid!
+  return checkOnlyBase || paramsToEnter == 0;
 }
