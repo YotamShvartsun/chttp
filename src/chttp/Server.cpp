@@ -115,19 +115,23 @@ void Server::ServeStaticFolder(std::string url, std::string folderPath) {
   folderPath = std::string(ptr);
 #endif
   this->staticFolderPath = folderPath;
-  std::unordered_map<int, std::string> matchAll;
-  // You can request to get any file name, so the template must accept everything
-  matchAll[0] = "*";
-  Url urlMatch(this->staticFolderUrl, matchAll);
+  Url urlMatch(this->staticFolderUrl + "/:*");
   RequestHandler handler(RequestType_t::GET, this->StaticFileHandler(),
                          urlMatch);
   this->router->AddHandler(handler);
 }
-void Server::Get(std::string baseUrl, const RequestHandlerFunction& function,
-                 const std::vector<RequestHandlerFunction>& middlewares,
-                 std::string urlFormat) {
-  auto urlFormatParser = RequestHandler::CreateParamMap(std::move(urlFormat));
-  Url urlMatch(std::move(baseUrl), urlFormatParser);
+
+Server::~Server() {
+  this->server.Close();
+  delete this->pool;
+  delete this->router;
+  Threadpool::Reset();
+  Router::Reset();
+}
+void Server::Get(std::string urlTemplate,
+                 const RequestHandlerFunction &function,
+                 const std::vector<RequestHandlerFunction> &middlewares) {
+  Url urlMatch(std::move(urlTemplate));
   RequestHandlerFunction actualFunction =
       [middlewares, function](const std::shared_ptr<HttpRequest> &req,
                               const std::shared_ptr<HttpResponse> &res) {
@@ -139,11 +143,10 @@ void Server::Get(std::string baseUrl, const RequestHandlerFunction& function,
                          urlMatch);
   this->router->AddHandler(handler);
 }
-void Server::Post(std::string baseUrl, const RequestHandlerFunction &function,
-                  const std::vector<RequestHandlerFunction> &middlewares,
-                  std::string urlFormat) {
-  auto urlFormatParser = RequestHandler::CreateParamMap(std::move(urlFormat));
-  Url urlMatch(std::move(baseUrl), urlFormatParser);
+void Server::Post(std::string urlTemplate,
+                  const RequestHandlerFunction &function,
+                  const std::vector<RequestHandlerFunction> &middlewares) {
+  Url urlMatch(std::move(urlTemplate));
   RequestHandlerFunction actualFunction =
       [middlewares, function](const std::shared_ptr<HttpRequest> &req,
                               const std::shared_ptr<HttpResponse> &res) {
@@ -153,11 +156,4 @@ void Server::Post(std::string baseUrl, const RequestHandlerFunction &function,
       };
   RequestHandler handler(RequestType_t::POST, actualFunction, urlMatch);
   this->router->AddHandler(handler);
-}
-Server::~Server() {
-  this->server.Close();
-  delete this->pool;
-  delete this->router;
-  Threadpool::Reset();
-  Router::Reset();
 }

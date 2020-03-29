@@ -18,12 +18,13 @@
  */
 class Router {
 private:
-	/**
-	 * A list of all routes in the server
-	 */
+  /**
+   * A list of all routes in the server
+   */
   std::vector<RequestHandler> routes;
   /**
-   * This is a singleton, so the instance must be stored in a private static field
+   * This is a singleton, so the instance must be stored in a private static
+   * field
    */
   static Router *instance;
   /**
@@ -36,12 +37,12 @@ private:
   std::function<void(std::shared_ptr<HttpRequest>,
                      std::shared_ptr<HttpResponse>, std::string)>
       errorHandler;
-	/**
-	 * Create a new router
-	 * @param routes A list of all routes
-	 * @param notFoundHandler A custom 404-error handler
-	 * @param errorHandler A custom general-error handler
-	 */
+  /**
+   * Create a new router
+   * @param routes A list of all routes
+   * @param notFoundHandler A custom 404-error handler
+   * @param errorHandler A custom general-error handler
+   */
   Router(std::vector<RequestHandler> routes,
          RequestHandlerFunction notFoundHandler,
          std::function<void(std::shared_ptr<HttpRequest>,
@@ -49,42 +50,42 @@ private:
              errorHandler
 
   );
-	/**
-	 * Create a new router, with default error pages
-	 * @param routes A list of routes
-	 */
+  /**
+   * Create a new router, with default error pages
+   * @param routes A list of routes
+   */
   explicit Router(std::vector<RequestHandler> routes);
-	/**
-	 * The default 404-error handler
-	 */
+  /**
+   * The default 404-error handler
+   */
   static void DefaultNotFound(const std::shared_ptr<HttpRequest> &,
                               const std::shared_ptr<HttpResponse> &);
   /**
    * The default general-error page
-  */
+   */
   static void DefaultError(const std::shared_ptr<HttpRequest> &,
                            const std::shared_ptr<HttpResponse> &,
                            const std::string &);
 
 public:
-	/**
-	 * Get an instance of the router class, with default error pages
-	 * @param routes The route list
-	 * @return An instance of the router class
-	 */
+  /**
+   * Get an instance of the router class, with default error pages
+   * @param routes The route list
+   * @return An instance of the router class
+   */
   static Router *GetInstance(std::vector<RequestHandler> routes);
- /**
-  * Get the existing instance of the router class
-  * @return An instance of the router class
-  */
+  /**
+   * Get the existing instance of the router class
+   * @return An instance of the router class
+   */
   static Router *GetInstance();
-	/**
-	 * Create an instance of the router class, with no default values
-	 * @param routes The route list
-	 * @param notFoundHandler The 404-error handler
-	 * @param errorHandler The general-error handler
-	 * @return A new instance of the router class
-	 */
+  /**
+   * Create an instance of the router class, with no default values
+   * @param routes The route list
+   * @param notFoundHandler The 404-error handler
+   * @param errorHandler The general-error handler
+   * @return A new instance of the router class
+   */
   static Router *GetInstance(
       const std::vector<RequestHandler> &routes,
       const RequestHandlerFunction &notFoundHandler,
@@ -103,7 +104,7 @@ public:
    */
   void Route(const std::shared_ptr<HttpRequest> &,
              const std::shared_ptr<HttpResponse> &);
- /**
+  /**
    * Set the instance to nullptr
    */
   static void Reset();

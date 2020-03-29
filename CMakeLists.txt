@@ -15,7 +15,7 @@ include_directories(include/chttp/data)
 
 
 add_library(chttp SHARED
-        src/Threadpool/Threadpool.cpp
+        src/chttp/Threadpool/Threadpool.cpp
         src/chttp/data/GetRequest.cpp
         src/chttp/data/HttpRequest.cpp
         src/chttp/data/HttpResponse.cpp

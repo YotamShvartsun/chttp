@@ -61,5 +61,5 @@ public:
    */
   std::vector<char> getData() const;
 
-  ~MultipartField();
+  ~MultipartField() = default;
 };

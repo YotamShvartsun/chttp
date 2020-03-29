@@ -82,26 +82,23 @@ public:
   void ServeStaticFolder(std::string url, std::string folderPath);
   /**
    * Add a GET route with middlewares
-   * @param baseUrl The base-Url of the route
+   * @param baseUrl A url format used to create the url-template
    * @param function The user defined handler
    * @param middlewares A list of functions that should run before the handler
    * runs
-   * @param urlFormat A url format used to create the url-template
    */
-  void Get(std::string baseUrl, const RequestHandlerFunction& function,
-           const std::vector<RequestHandlerFunction>& middlewares,
-           std::string urlFormat = "/");
+  void Get(std::string urlTemplate, const RequestHandlerFunction& function,
+           const std::vector<RequestHandlerFunction>& middlewares);
+
   /**
    * Add a POST route with middlewares
-   * @param baseUrl The base-Url of the route
+   * @param baseUrl A url format used to create the url-template
    * @param function The user defined handler
    * @param middlewares A list of functions that should run before the handler
    * runs
-   * @param urlFormat A url format used to create the url-template
    */
-  void Post(std::string baseUrl, const RequestHandlerFunction &function,
-            const std::vector<RequestHandlerFunction> &middlewares,
-            std::string urlFormat = "/");
+  void Post(std::string urlTemplate, const RequestHandlerFunction& function,
+           const std::vector<RequestHandlerFunction>& middlewares);
   /**
    * Stop the server and release all resources acquired
    */

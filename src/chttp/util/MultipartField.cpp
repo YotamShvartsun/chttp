@@ -93,4 +93,3 @@ MultipartField::getHeaders() const {
 }
 
 std::vector<char> MultipartField::getData() const { return this->data; }
-MultipartField::~MultipartField() { this->headers.clear(); }

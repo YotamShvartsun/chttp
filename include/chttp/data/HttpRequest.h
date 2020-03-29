@@ -90,12 +90,12 @@ public:
   /**
    * @brief  Returns the value of url the parameter specified
    * @note   If the name given cannot be found, it will throw std::runtime_error
-   * @retval Url parameter requested
+   * @return Url parameter requested
    */
   std::string GetUrlParam(const std::string &) const;
 
   /**
-   * @brief  Populate this->urlParams using the data given from Url object
+   * @brief  Populate this->parameters using the data given from Url object
    * @retval None
    */
   void PopulateParams(const Url &);
