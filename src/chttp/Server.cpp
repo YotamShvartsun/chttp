@@ -12,6 +12,8 @@
 #include <climits>
 #include <cstdlib>
 #include <utility>
+#else
+#include <Windows.h>
 #endif
 
 void Server::OnClient(Router *router,
@@ -113,6 +115,15 @@ void Server::ServeStaticFolder(std::string url, std::string folderPath) {
     exit(1);
   }
   folderPath = std::string(ptr);
+#else
+  std::replace(folderPath.begin(), folderPath.end(), '/', '\\');
+  char *relativePath = const_cast<char*>(folderPath.c_str());
+  char abdolutePath[MAX_PATH] = { 0 };
+  if (GetFullPathNameA(relativePath, MAX_PATH, abdolutePath, nullptr) == 0) {
+	  std::cerr << "Directory " << folderPath << " not found!" << std::endl;
+	  exit(1);
+  }
+  folderPath = std::string(abdolutePath);
 #endif
   this->staticFolderPath = folderPath;
   Url urlMatch(this->staticFolderUrl + "/:*");
