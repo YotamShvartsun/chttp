@@ -27,15 +27,14 @@ bool Socket::ShouldCallWSAStartup = true;
 // constructor
 Socket::Socket() : referenceCount() {
 #ifdef _WIN32
-	if (Socket::ShouldCallWSAStartup)
-	{
-		WSADATA ws;
-		if (WSAStartup(MAKEWORD(2, 2), &ws) != NO_ERROR) {
-			wprintf(L"Error at WSAStartup()\n");
-			exit(-1);
-		}
-		Socket::ShouldCallWSAStartup = false;
-	}
+  if (Socket::ShouldCallWSAStartup) {
+    WSADATA ws;
+    if (WSAStartup(MAKEWORD(2, 2), &ws) != NO_ERROR) {
+      wprintf(L"Error at WSAStartup()\n");
+      exit(-1);
+    }
+    Socket::ShouldCallWSAStartup = false;
+  }
 #endif // _WIN32
 
   this->referenceCount.store(new int(1));
@@ -88,34 +87,35 @@ void Socket::Bind(int port) {
   // another (killed) process.
 #ifndef _WIN32
   if (setsockopt(this->sockfd, SOL_SOCKET,
-	  SO_REUSEADDR | SO_REUSEPORT, // NOLINT
-	  &optionValue, sizeof(optionValue)) != 0) {
-	  throw std::system_error(errno, std::system_category(),
-		  "Unable to setup socket!");
+                 SO_REUSEADDR | SO_REUSEPORT, // NOLINT
+                 &optionValue, sizeof(optionValue)) != 0) {
+    throw std::system_error(errno, std::system_category(),
+                            "Unable to setup socket!");
   }
   // make sure that this->server_addr is clean - all data in it is ours.
-  bzero((char*) & (this->server_addr), sizeof(this->server_addr));
+  bzero((char *)&(this->server_addr), sizeof(this->server_addr));
   this->server_addr.sin_family = AF_INET;
   this->server_addr.sin_addr.s_addr = INADDR_ANY;
   this->server_addr.sin_port =
-	  htons(port); // parse host-byte order to network-byte order
+      htons(port); // parse host-byte order to network-byte order
 
-  if (bind(this->sockfd, (struct sockaddr*) & (this->server_addr),
-	  sizeof(this->server_addr)) < 0)
-	  throw std::system_error(errno, std::system_category(), "Unable to bind");
+  if (bind(this->sockfd, (struct sockaddr *)&(this->server_addr),
+           sizeof(this->server_addr)) < 0)
+    throw std::system_error(errno, std::system_category(), "Unable to bind");
 #else
   if (setsockopt(this->sockfd, SOL_SOCKET,
-	  SO_REUSEADDR, // NOLINT
-	  (char*)&optionValue, sizeof(optionValue)) == SOCKET_ERROR) {
-	  throw std::system_error(errno, std::system_category(),
-		  "Unable to setup socket!");
+                 SO_REUSEADDR, // NOLINT
+                 (char *)&optionValue, sizeof(optionValue)) == SOCKET_ERROR) {
+    throw std::system_error(errno, std::system_category(),
+                            "Unable to setup socket!");
   }
-  this->server_addr = { 0 };
+  this->server_addr = {0};
   this->server_addr.sin_port = htons(port);
   this->server_addr.sin_family = AF_INET;
   this->server_addr.sin_addr.s_addr = INADDR_ANY;
-  if (::bind(this->sockfd, (struct sockaddr*) & (this->server_addr), sizeof(this->server_addr)) == SOCKET_ERROR)
-	  throw std::runtime_error("Unable to bind");
+  if (::bind(this->sockfd, (struct sockaddr *)&(this->server_addr),
+             sizeof(this->server_addr)) == SOCKET_ERROR)
+    throw std::runtime_error("Unable to bind");
 #endif // !_WIN32
   this->isBound = true;
 }
@@ -154,6 +154,13 @@ Socket Socket::Accept() {
     throw std::system_error(errno, std::system_category(),
                             "Connection failed!");
   }
+  struct timeval timeout {
+    1, 0
+  };
+  if (::setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout,
+                   sizeof(timeout)) < 0) {
+    throw std::runtime_error("Cannot change socket settings");
+  }
   return Socket(sock);
 }
 
@@ -178,8 +185,13 @@ std::vector<char> Socket::GetData(unsigned int maxBufferSize) {
     this->Close();
     throw std::runtime_error("Unable to read data from a closed socket!");
   } else {
-    // when recv returns -1, it means that something is wrong - throw an error.
-    throw std::system_error(errno, std::system_category());
+    if (errno != EAGAIN && errno != EWOULDBLOCK) {
+      // when recv returns -1, it means that something is wrong - throw an
+      // error.
+      throw std::system_error(errno, std::system_category());
+    } else {
+      throw std::runtime_error("Timed out");
+    }
   }
   return res;
 }
@@ -200,21 +212,21 @@ void Socket::Close() {
   this->isBound = false;
 #ifndef _WIN32
   if (this->sockfd > 0) {
-	  if (::close(this->sockfd)) {
-		  // handle errors
-		  this->sockfd = -1;
-		  throw std::system_error(errno, std::system_category(),
-			  "Unable to close socket");
-	  }
-	  this->sockfd = -1;
-}
+    if (::close(this->sockfd)) {
+      // handle errors
+      this->sockfd = -1;
+      throw std::system_error(errno, std::system_category(),
+                              "Unable to close socket");
+    }
+    this->sockfd = -1;
+  }
 #else
   if (this->sockfd != INVALID_SOCKET) {
-	  if (::closesocket(this->sockfd)) {
-		  this->sockfd = INVALID_SOCKET;
-		  throw std::system_error(errno, std::system_category(),
-			  "Unable to close socket");
-	  }
+    if (::closesocket(this->sockfd)) {
+      this->sockfd = INVALID_SOCKET;
+      throw std::system_error(errno, std::system_category(),
+                              "Unable to close socket");
+    }
   }
   this->sockfd = INVALID_SOCKET;
 #endif // !_WIN32
