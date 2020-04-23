@@ -188,6 +188,10 @@ class HttpResponse {
    */
   std::unordered_map<std::string, std::string> headers;
   /**
+   * New cookies added by the response
+   */
+  std::unordered_map<std::string, std::string> newCookies;
+  /**
    * Holds whether the response body has already been given value
    */
   bool dataSet;
@@ -198,7 +202,7 @@ class HttpResponse {
    */
   std::string BuildHeaders();
 
- public:
+  public:
   /**
    * Build an empty HttpResponse object
    */
@@ -249,4 +253,9 @@ class HttpResponse {
    * @param url the new url
    */
   void Redirect(std::string url);
+
+  void RemoveCookie(const std::string &cookieName);
+
+  void AddCookie(std::string cookieName, std::string cookieValue);
+  void AddCookie(std::string cookieName, std::string cookieValue, int maxAge);
 };
