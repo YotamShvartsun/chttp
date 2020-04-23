@@ -3,8 +3,8 @@
  * @author Yotam Shvartsun <yotam.shvartsun@gmail.com>
  * @version 1.0
  * @section DESCRIPTION
- * This file contains the implementation of the HttpResponse class, and functions
- * to handle file reading
+ * This file contains the implementation of the HttpResponse class, and
+ * functions to handle file reading
  */
 #include <fstream>
 #include <iostream>
@@ -21,6 +21,7 @@
 #endif
 
 #include <chttp/data/HttpResponse.h>
+
 #include <string>
 
 /**
@@ -34,7 +35,7 @@ bool FileExists(const std::string &path) {
 
 std::string HttpResponse::BuildHeaders() {
   std::string
-      raw; // it's much easier to do this as a number of string operations
+      raw;  // it's much easier to do this as a number of string operations
   for (auto &pair : this->headers) {
     raw += pair.first + ": " + pair.second + "\r\n";
   }
@@ -51,8 +52,7 @@ void HttpResponse::Header(const std::string &key, const std::string &value) {
 
 void HttpResponse::SendFile(const std::string &path) {
   // If request body already set, throw error
-  if (this->dataSet)
-    throw std::logic_error("Body already set!");
+  if (this->dataSet) throw std::logic_error("Body already set!");
 
   // If the file requested dose not exists, throw FileNotFound error
   if (!FileExists(path))
@@ -62,14 +62,13 @@ void HttpResponse::SendFile(const std::string &path) {
   std::string ext = path.substr(path.find_last_of('.'));
   std::ifstream file(path, std::ios::binary);
   this->payload = std::vector<char>((std::istreambuf_iterator<char>(file)),
-                                    std::istreambuf_iterator<char>());
+				    std::istreambuf_iterator<char>());
   this->Header("Content-type", HttpResponse::MIME_TYPES.at(ext));
   this->dataSet = true;
 }
 
 void HttpResponse::Raw(const std::vector<char> &data) {
-  if (this->dataSet)
-    throw std::logic_error("Body already set!");
+  if (this->dataSet) throw std::logic_error("Body already set!");
   this->payload = data;
   this->dataSet = true;
 }
@@ -79,8 +78,8 @@ std::vector<char> HttpResponse::Format() {
   this->Header("Content-Length", std::to_string(this->payload.size()));
   // Build the status line
   std::string responseMeta = "HTTP/1.1 " + std::to_string(this->status) + " " +
-                             HttpResponse::HttpCodeStrings.at(this->status) +
-                             "\r\n";
+			     HttpResponse::HttpCodeStrings.at(this->status) +
+			     "\r\n";
   std::vector<char> response;
 
   responseMeta += this->BuildHeaders();
@@ -94,4 +93,16 @@ std::vector<char> HttpResponse::Format() {
   response.push_back('\r');
   response.push_back('\n');
   return response;
+}
+
+bool HttpResponse::isSet() const { return this->dataSet; }
+
+void HttpResponse::Redirect(std::string url) {
+  this->Header("Location", url);
+  this->SetStatus(HTTP_STATUS::Found);
+  this->dataSet = true;
+}
+void HttpResponse::Raw(std::string body) {
+  std::vector<char> asVector(body.begin(), body.end());
+  this->Raw(asVector);
 }
