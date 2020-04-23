@@ -89,7 +89,7 @@ enum HTTP_STATUS {
  * @note Any response object can change it's payload once
  */
 class HttpResponse {
-private:
+ private:
   /**
    * The Reason phrase for each status code
    * @see <a href="https://tools.ietf.org/html/rfc2616#section-6.1">RFC 2616,
@@ -188,6 +188,10 @@ private:
    */
   std::unordered_map<std::string, std::string> headers;
   /**
+   * New cookies added by the response
+   */
+  std::unordered_map<std::string, std::string> newCookies;
+  /**
    * Holds whether the response body has already been given value
    */
   bool dataSet;
@@ -198,7 +202,7 @@ private:
    */
   std::string BuildHeaders();
 
-public:
+  public:
   /**
    * Build an empty HttpResponse object
    */
@@ -233,10 +237,25 @@ public:
    * @throws std::logic_error if this function or SendFile has been called
    */
   void Raw(const std::vector<char> &);
-
+  void Raw(std::string);
   /**
    * @brief format this response to text
    * @return this response as a valid HTTP response
    */
   std::vector<char> Format();
+  /**
+   * @brief Checks if the payload of this request has been set
+   * @return true if set, false if not
+   */
+  bool isSet() const;
+  /**
+   * Redirect the request to a url
+   * @param url the new url
+   */
+  void Redirect(std::string url);
+
+  void RemoveCookie(const std::string &cookieName);
+
+  void AddCookie(std::string cookieName, std::string cookieValue);
+  void AddCookie(std::string cookieName, std::string cookieValue, int maxAge);
 };
