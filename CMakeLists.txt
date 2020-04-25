@@ -25,7 +25,8 @@ add_library(chttp SHARED
         src/chttp/util/Url.cpp
         src/chttp/RequestHandler.cpp
         src/chttp/Router.cpp
-        src/chttp/Server.cpp)
+        src/chttp/Server.cpp
+        include/chttp/data/Cookie.hpp)
 
 target_include_directories(chttp PRIVATE include)
 target_include_directories(chttp PRIVATE include/chttp)
@@ -44,3 +45,6 @@ install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 install(FILES ${CMAKE_BINARY_DIR}/chttp.pc
         DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pkgconfig)
+
+#add_executable(test src/main.cpp)
+#target_link_libraries(test chttp)

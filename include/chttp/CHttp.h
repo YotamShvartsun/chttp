@@ -18,3 +18,4 @@
 #include <chttp/util/MultipartField.h>
 #include <chttp/util/Socket.h>
 #include <chttp/util/Url.h>
+#include <chttp/data/Cookie.hpp>
