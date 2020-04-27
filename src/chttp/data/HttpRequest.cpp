@@ -7,6 +7,7 @@
  * functions In this file there are also helper functions used by the CHttp
  * library, in order to preform repetetive string relaeted actions
  */
+#include <algorithm>
 #include <chttp/data/HttpRequest.h>
 #include <sstream>
 #include <utility>
@@ -161,6 +162,7 @@ HttpRequest::ParseHTTPHeaders(std::vector<char> data) {
     std::cout << l << std::endl;
 #endif
   std::vector<std::string> tmp;
+  std::string headerName;
   for (auto &l : filteredLines) {
     /**
      * A valid HTTP header must have a colon in it, which seperates between the
@@ -169,7 +171,9 @@ HttpRequest::ParseHTTPHeaders(std::vector<char> data) {
      * section 4.2</a>
      */
     tmp = SplitOnce(l, ":");
-    res.insert(std::make_pair(tmp.front(), tmp.back()));
+	headerName = tmp.front();
+	std::transform(headerName.begin(), headerName.end(), headerName.begin(), ::tolower);
+    res.insert(std::make_pair(headerName, tmp.back()));
   }
 #ifdef DEBUG
   std::cout << "RESULT:" << std::endl;

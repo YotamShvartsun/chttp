@@ -132,5 +132,5 @@ public:
    * This enum represents the different request types possible. For now, you can only use POST and GET.
    * When extending this framework, add request types to this enum as well.
    */
-  enum REQUEST_TYPES { GET, POST };
+  enum REQUEST_TYPES { GET, POST, Unknown };
 };

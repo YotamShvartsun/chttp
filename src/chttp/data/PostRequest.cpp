@@ -36,7 +36,7 @@ void PostRequest::FromString(std::vector<char> data) {
   this->headers = HttpRequest::ParseHTTPHeaders(tmp);
   try {
     // Parse the body
-    long bodySize = std::stol(this->headers.at("Content-Length"));
+    long bodySize = std::stol(this->headers.at("content-length"));
     std::string bodyString = asString.substr(headersEnd + 4, bodySize);
     this->body = std::vector<char>(bodyString.begin(), bodyString.end());
   } catch (std::exception &e) {
