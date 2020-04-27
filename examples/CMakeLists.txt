@@ -3,6 +3,13 @@ project(examples)
 find_library(chttp REQUIRED)
 set(CMAKE_CXX_STANDARD 14)
 
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp/include)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/json)
+include_directories(../include)
+
 add_executable(examples main.cpp)
 
-target_link_libraries(examples chttp)
+target_link_libraries(examples
+        SQLiteCpp
+        chttp)
