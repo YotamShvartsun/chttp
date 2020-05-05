@@ -172,7 +172,8 @@ class HttpResponse {
       {".mp3", "audio/mpeg"},
       {".gz", "application/gzip"},
       {".png", "image/png"},
-      {".html", "text/html"}};
+      {".html", "text/html"},
+      {".css", "text/css"}};
 
   /**
    * Status of the request

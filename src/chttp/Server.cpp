@@ -84,11 +84,16 @@ void Server::OnClient(Router *router,
 }
 std::function<void(std::shared_ptr<HttpRequest>, std::shared_ptr<HttpResponse>)>
 Server::StaticFileHandler() {
-	return [this](const std::shared_ptr<HttpRequest> &request,
+#ifdef _WIN32
+	const char PATH_SEP = '\\';
+#else
+	const char PATH_SEP = '/';
+#endif
+	return [this, PATH_SEP](const std::shared_ptr<HttpRequest> &request,
 				  const std::shared_ptr<HttpResponse> &response) {
 		std::string requestUrl = request->GetUrl();
 		std::string filePath =
-				this->staticFolderPath + '/' +
+				this->staticFolderPath + PATH_SEP +
 				requestUrl.substr(requestUrl.find(this->staticFolderUrl) +
 								  this->staticFolderUrl.size());
 		response->SendFile(filePath);

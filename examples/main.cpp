@@ -196,19 +196,19 @@ void GetPostsByUID(std::shared_ptr<HttpRequest> req, std::shared_ptr<HttpRespons
     if (respBody.contains("error")) {
         resp->SetStatus(Internal_Server_Error);
     } else if (respBody["posts"].empty()) {
-        try{
+        try {
             SQLite::Database db(DB_FILE);
             SQLite::Statement isUser(db, "select count(*) as count from users where id=?");
             isUser.bind(1, UID);
             int tmp = 0;
             bool userFound = false;
-            while(isUser.executeStep()) {
+            while (isUser.executeStep()) {
                 tmp = isUser.getColumn("count");
                 if (tmp != 0) {
                     userFound = true;
                 }
             }
-            if(!userFound){
+            if (!userFound) {
                 respBody.clear();
                 respBody["error"] = "User not found";
                 resp->SetStatus(Not_Found);
@@ -290,8 +290,83 @@ void DeletePostByID(std::shared_ptr<HttpRequest> req, std::shared_ptr<HttpRespon
     resp->Raw(responseBody.dump());
 }
 
+void EditPostByID(std::shared_ptr<HttpRequest> req, std::shared_ptr<HttpResponse> resp) {
+    int postID = std::stoi(req->GetUrlParam("postID"));
+    CookieJar cookies(req->GetHeaders()["cookie"]);
+    nlohmann::json responseBody;
+    if (cookies.IsInJar("Auth")) {
+        try {
+            nlohmann::json cookieBody = nlohmann::json::parse(cookies.GetCookieValue("Auth"));
+            int UID = cookieBody["UID"].get<int>();
+            SQLite::Database db(DB_FILE, SQLite::OPEN_READWRITE);
+            SQLite::Statement isUser(db, "select count(*) as count from users where id=?");
+            bool isLoggedIn = false;
+            int tmp = 0;
+            isUser.bind(1, UID);
+            while (isUser.executeStep()) {
+                tmp = isUser.getColumn("count");
+                if (tmp != 0) {
+                    isLoggedIn = true;
+                }
+            }
+            if (isLoggedIn) {
+                SQLite::Statement postExists(db, "select count(*) as count from posts where id=?");
+                bool isPost = false;
+                postExists.bind(1, postID);
+                while (postExists.executeStep()) {
+                    tmp = postExists.getColumn("count");
+                    if (tmp != 0) {
+                        isPost = true;
+                    }
+                }
+                if (isPost) {
+                    SQLite::Statement isAllowedToEdit(db, "select publisher_id from posts where id=?");
+                    isAllowedToEdit.bind(1, postID);
+                    bool canEdit = false;
+                    while (isAllowedToEdit.executeStep()) {
+                        tmp = isAllowedToEdit.getColumn("publisher_id");
+                        if (tmp == UID) {
+                            canEdit = true;
+                        }
+                    }
+                    if (canEdit) {
+                        SQLite::Statement editStmt(db, "update posts set post_content=? where id=?");
+                        nlohmann::json requestBody = nlohmann::json::parse(
+                                dynamic_cast<PostRequest *>(req.get())->GetBody());
+                        std::string newContent = requestBody["body"].get<std::string>();
+                        editStmt.bind(1, newContent);
+                        editStmt.bind(2, postID);
+                        editStmt.exec();
+                    } else {
+                        resp->SetStatus(Unauthorized);
+                        responseBody["error"] = "You are not allowed to do this";
+                    }
+                } else {
+                    resp->SetStatus(Not_Found);
+                    responseBody["error"] = "No post with ID" + std::to_string(postID) + " exist";
+                }
+            } else {
+                resp->SetStatus(Unauthorized);
+                responseBody["error"] = "You are not allowed to do this";
+            }
+        } catch (...) {
+            responseBody["error"] = "Something went wrong!";
+            resp->SetStatus(Internal_Server_Error);
+        }
+    } else {
+        resp->SetStatus(Unauthorized);
+        responseBody["error"] = "You are not allowed to do this";
+    }
+    resp->Header("Content-Type", "application/json");
+    resp->Raw(responseBody.dump());
+}
+
+void MainHandler(std::shared_ptr<HttpRequest> req, std::shared_ptr<HttpResponse> resp){
+    resp->SendFile("../dist/index.html");
+}
+
 int main(int argc, char **argv) {
-    int port = 8081;
+    int port = 80;
     if (argc == 2) {
         port = std::stoi(argv[1]);
     }
@@ -308,5 +383,8 @@ int main(int argc, char **argv) {
     server.Get("/api/v1/posts", AllPosts, {});
     server.Get("/api/v1/:UID/posts", GetPostsByUID, {});
     server.Get("/api/v1/delete/:postID", DeletePostByID, {});
+    server.Post("/api/v1/edit/:postID", EditPostByID, {});
+    server.ServeStaticFolder("/", "../dist");
+    server.Get("/", MainHandler, {});
     server.Run(port);
 }

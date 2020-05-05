@@ -22,6 +22,7 @@
 
 #include <chttp/data/HttpResponse.h>
 
+#include <algorithm>
 #include <string>
 
 /**
@@ -57,14 +58,17 @@ void HttpResponse::SendFile(const std::string &path) {
 	// If request body already set, throw error
 	if (this->dataSet)
 		throw std::logic_error("Body already set!");
-
+    std::string pathTmp = path;
+#ifdef _WIN32
+	std::replace(pathTmp.begin(), pathTmp.end(), '/', '\\');
+#endif
 	// If the file requested dose not exists, throw FileNotFound error
-	if (!FileExists(path))
+	if (!FileExists(pathTmp))
 		throw std::runtime_error("File not found in path specified!");
 
 	// read the file and set Content-Type
-	std::string ext = path.substr(path.find_last_of('.'));
-	std::ifstream file(path, std::ios::binary);
+	std::string ext = pathTmp.substr(path.find_last_of('.'));
+	std::ifstream file(pathTmp, std::ios::binary);
 	this->payload = std::vector<char>((std::istreambuf_iterator<char>(file)),
 									  std::istreambuf_iterator<char>());
 	this->Header("Content-type", HttpResponse::MIME_TYPES.at(ext));
