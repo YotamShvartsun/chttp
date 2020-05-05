@@ -172,6 +172,9 @@ HttpRequest::ParseHTTPHeaders(std::vector<char> data) {
      */
     tmp = SplitOnce(l, ":");
 	headerName = tmp.front();
+	if(headerName[0] == '\n'){
+		headerName = headerName.substr(1);
+	}
 	std::transform(headerName.begin(), headerName.end(), headerName.begin(), ::tolower);
     res.insert(std::make_pair(headerName, tmp.back()));
   }

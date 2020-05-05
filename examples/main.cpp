@@ -122,7 +122,7 @@ void CreatePost(std::shared_ptr<HttpRequest> req, std::shared_ptr<HttpResponse> 
                 insertPost.exec();
                 respBody["id"] = db.getLastInsertRowid();
             } else {
-                respBody["error"] = "You are not allowed to do that";
+                respBody["error"] = "You are not allowed to do that #1";
                 resp->SetStatus(Unauthorized);
             }
         } catch (std::exception &e) {
@@ -366,7 +366,7 @@ void MainHandler(std::shared_ptr<HttpRequest> req, std::shared_ptr<HttpResponse>
 }
 
 int main(int argc, char **argv) {
-    int port = 80;
+    int port = 8080;
     if (argc == 2) {
         port = std::stoi(argv[1]);
     }
