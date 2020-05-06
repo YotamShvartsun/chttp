@@ -1,6 +1,7 @@
 <template>
     <div id="signup-form">
         <b-form @submit="doSignup">
+            <b-alert variant="danger" dismissible :show="error">Something went wrong.</b-alert>
             <b-form-group id="username_input_group" label="Username:" label-for="username">
                 <b-form-input id="username" v-model="input.username" type="text" required
                               placeholder="Enter username:"></b-form-input>
@@ -22,7 +23,8 @@
               input: {
                   username: null,
                   password: null
-              }
+              },
+              error: false
           }
         },
         methods:{
@@ -33,7 +35,7 @@
                     body: JSON.stringify(this.input)
                 });
                 if (!resp.ok) {
-                    this.errorMessage = (await resp.json()).error;
+                    this.error = true;
                 } else {
                     this.$emit('userUpdated', (await resp.json()).UID);
                     this.$router.push('/');
