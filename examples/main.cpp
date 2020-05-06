@@ -330,12 +330,14 @@ void EditPostByID(std::shared_ptr<HttpRequest> req, std::shared_ptr<HttpResponse
                         }
                     }
                     if (canEdit) {
-                        SQLite::Statement editStmt(db, "update posts set post_content=? where id=?");
+                        SQLite::Statement editStmt(db, "update posts set post_content=?, post_title=? where id=?");
                         nlohmann::json requestBody = nlohmann::json::parse(
                                 dynamic_cast<PostRequest *>(req.get())->GetBody());
                         std::string newContent = requestBody["body"].get<std::string>();
+                        std::string newTitle = requestBody["title"].get<std::string>();
                         editStmt.bind(1, newContent);
-                        editStmt.bind(2, postID);
+                        editStmt.bind(2, newTitle);
+                        editStmt.bind(3, postID);
                         editStmt.exec();
                     } else {
                         resp->SetStatus(Unauthorized);
