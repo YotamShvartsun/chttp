@@ -1,5 +1,6 @@
 <template>
     <div id="posts">
+        <b-button v-if="$parent.$data.userID" variant="outline-primary" @click="$router.push('/new_post')">Create a new post</b-button>
         <div v-for="post in posts" v-bind:key="post.id">
             <Post :title="post.title" :body="post.body"></Post>
             <br>
@@ -23,8 +24,8 @@
                 alert('Something went wrong!');
                 console.error(await resp.json());
             } else {
-                const aaa = (await resp.json());
-                this.posts = aaa.posts;
+                const data = (await resp.json());
+                this.posts = data.posts;
             }
         }
     }
