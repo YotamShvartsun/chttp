@@ -24,7 +24,7 @@ void from_json(const nlohmann::json &j, blogPostJSON &p) {
 }
 
 void CreateTables(SQLite::Database &db) {
-    db.exec("CREATE TABLE IF NOT EXISTS users(id integer primary key, username char(20), password text)");
+    db.exec("CREATE TABLE IF NOT EXISTS users(id integer primary key, username char(20) unique, password text)");
     db.exec("CREATE TABLE IF NOT EXISTS posts(id integer primary key, publisher_id integer,post_title text, post_content TEXT, foreign key(publisher_id) references users(id))");
 }
 
