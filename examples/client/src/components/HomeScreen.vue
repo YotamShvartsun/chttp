@@ -1,14 +1,21 @@
 <template>
-    <div id="posts">
+    <div class="f-container">
+        <div style="padding-bottom: 10px;" class="f-container">
+            <b-button v-if="$parent.$data.userID" variant="outline-primary" @click="$router.push('/new_post')">Create a
+                new post
+            </b-button>
+        </div>
         <div v-for="post in posts" v-bind:key="post.id">
             <Post :title="post.title" :body="post.body"></Post>
             <br>
         </div>
+
     </div>
 </template>
 
 <script>
     import Post from "@/components/Post";
+
     export default {
         name: "HomeScreen",
         components: {Post},
@@ -23,18 +30,20 @@
                 alert('Something went wrong!');
                 console.error(await resp.json());
             } else {
-                const aaa = (await resp.json());
-                this.posts = aaa.posts;
+                const data = (await resp.json());
+                this.posts = data.posts;
             }
         }
     }
 </script>
 
 <style scoped>
+    .f-container {
+        display: flex;
+        flex-flow: row wrap;
+    }
 
+    .f-container > * {
+        flex: 1 100%;
+    }
 </style>
-<!--{
-                    id: 1,
-                    title: "Is vue cool? the answer might surprise you - Yotam",
-                    body: 'hell ya!',
-                }-->
