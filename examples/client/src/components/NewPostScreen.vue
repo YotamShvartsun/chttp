@@ -16,7 +16,7 @@
         <b-form @submit="editForm">
             <b-form-group label="Title" label-for="titleInput">
                 <b-form-input type="text" id="titleInput" required :placeholder="title" :value="title"
-                              v-model="userInput.title" disabled></b-form-input>
+                              v-model="userInput.title"></b-form-input>
             </b-form-group>
             <b-form-group label="Content" label-for="content">
                 <b-form-textarea id="content" :placeholder="ogContent" :value="ogContent"
@@ -42,6 +42,7 @@
         created(){
           if(this.$props.isEditPostPage){
               this.userInput.body = this.$props.ogContent;
+              this.userInput.title = this.$props.title;
           }
         },
         props: ['isEditPostPage', 'ogContent', 'title', 'postID'],
@@ -64,7 +65,7 @@
                 const resp = await fetch(`/api/v1/edit/${this.$props.postID}`, {
                     method: 'post',
                     headers: {'content-type': 'application/json'},
-                    body: JSON.stringify({body: this.userInput.body})
+                    body: JSON.stringify(this.userInput)
                 });
                 if(!resp.ok){
                     this.error = (await resp.json()).error;
