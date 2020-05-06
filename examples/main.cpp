@@ -40,11 +40,11 @@ void Signup(std::shared_ptr<HttpRequest> req, std::shared_ptr<HttpResponse> resp
         insertNewUser.bind(1, username);
         insertNewUser.bind(2, password);
         insertNewUser.exec();
-        responseBody["id"] = db.getLastInsertRowid();
+        responseBody["UID"] = db.getLastInsertRowid();
         resp->AddCookie("Auth", responseBody.dump());
     } catch (std::exception &e) {
         responseBody["error"] = "Unable to create a new user!";
-        resp->SetStatus(Unauthorized);
+        resp->SetStatus(Internal_Server_Error);
     }
     resp->Header("Content-Type", "application/json");
     resp->Raw(responseBody.dump());
@@ -101,7 +101,7 @@ void CreatePost(std::shared_ptr<HttpRequest> req, std::shared_ptr<HttpResponse> 
             SQLite::Database db(DB_FILE, SQLite::OPEN_READWRITE);
             SQLite::Statement isUser(db, "select count(*) as count from users where id=?");
             bool isLoggedIn = false;
-            int tmp = cookieBody["UID"].get<int>();
+            int tmp = cookieBody["UID"];
             isUser.bind(1, tmp);
             while (isUser.executeStep()) {
                 tmp = isUser.getColumn("count");
@@ -151,7 +151,7 @@ void AllPosts(std::shared_ptr<HttpRequest> req, std::shared_ptr<HttpResponse> re
         while (allPosts.executeStep()) {
             postTmp.body = allPosts.getColumn(0).getString();
             titleTmp = allPosts.getColumn(1).getString();
-            titleTmp += " - " + allPosts.getColumn(3).getString();
+            titleTmp += " (" + allPosts.getColumn(3).getString() + "):";
             postTmp.title = titleTmp;
             postTmp.id = allPosts.getColumn(2).getInt();
             posts.push_back(postTmp);
@@ -366,9 +366,9 @@ void MainHandler(std::shared_ptr<HttpRequest> req, std::shared_ptr<HttpResponse>
 }
 
 int main(int argc, char **argv) {
-    int port = 8080;
-    if (argc == 2) {
-        port = std::stoi(argv[1]);
+    int port = 8081;
+    if (char * env_port = std::getenv("PORT")) {
+        port = std::stoi(env_port);
     }
     {
         SQLite::Database dbHandler("exampleBlogDB.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
@@ -386,5 +386,5 @@ int main(int argc, char **argv) {
     server.Post("/api/v1/edit/:postID", EditPostByID, {});
     server.ServeStaticFolder("/", "../dist");
     server.Get("/", MainHandler, {});
-    server.Run(port);
+    server.Run(port, []{});
 }

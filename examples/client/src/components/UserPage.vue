@@ -68,13 +68,7 @@
     .f-container > * {
         flex: 1 100%;
     }
-
-    .post-container {
-        margin: 0 auto;
-        /*line-height: 0;*/
-    }
-
-    .trash-icon {
-        float: right;
+    * {
+        overflow-x: hidden;
     }
 </style>

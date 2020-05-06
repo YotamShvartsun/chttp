@@ -1,10 +1,10 @@
 <template>
     <div id="app">
-        <b-navbar variant="info" toggleable="lg" type="dark">
+        <b-navbar variant="dark" type="dark" sticky>
             <b-navbar-brand href="/">CHttp</b-navbar-brand>
             <b-collapse is-nav>
                 <b-navbar-nav class="ml-auto" v-if="userID">
-                    <b-nav-item @click="logOut">Logout</b-nav-item>
+                    <b-nav-item @click="logOut" class="text-light">Logout</b-nav-item>
                     <b-nav-item @click="goToUserPage">Profile</b-nav-item>
                 </b-navbar-nav>
                 <b-navbar-nav class="ml-auto" v-else>
@@ -54,13 +54,6 @@
 </script>
 
 <style>
-    #top {
-        padding: 1.5%;
-        background: #d9f1ff;
-        display: flex;
-        flex-flow: row wrap;
-        justify-content: flex-end;
-    }
 
     #top * {
         margin-left: 15px;
