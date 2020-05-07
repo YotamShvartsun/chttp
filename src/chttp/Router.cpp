@@ -7,6 +7,7 @@
  */
 #include <chttp/Router.h>
 
+#include <chttp/util/CHttpError.hpp>
 #include <utility>
 
 Router *Router::instance = nullptr;
@@ -47,9 +48,12 @@ void Router::Route(const std::shared_ptr<HttpRequest> &req,
     if (handler.IsMatching(req)) {
       try {
         handler(req, res);
-      } catch (std::exception &e) {
+      } catch (CHttpError &e) {
         this->errorHandler(req, res, e.what());
-      }
+		res->SetStatus(e.GetErrorCode());
+      } catch (std::exception &e) {
+		  std::cerr << "Error thrown while serving " << req->GetUrl() << std::endl << "Error message: " << e.what() << std::endl;
+	  }
       return;
     }
   }

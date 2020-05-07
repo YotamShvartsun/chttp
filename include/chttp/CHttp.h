@@ -19,3 +19,4 @@
 #include <chttp/util/Socket.h>
 #include <chttp/util/Url.h>
 #include <chttp/data/Cookie.hpp>
+#include <chttp/util/CHttpError.hpp>
