@@ -53,6 +53,7 @@ void Router::Route(const std::shared_ptr<HttpRequest> &req,
 		res->SetStatus(e.GetErrorCode());
       } catch (std::exception &e) {
 		  std::cerr << "Error thrown while serving " << req->GetUrl() << std::endl << "Error message: " << e.what() << std::endl;
+		  this->errorHandler(req, res, "Something went wrong!");
 	  }
       return;
     }
@@ -87,7 +88,7 @@ void Router::DefaultNotFound(const std::shared_ptr<HttpRequest> &req,
 void Router::DefaultError(const std::shared_ptr<HttpRequest> &req,
                           const std::shared_ptr<HttpResponse> &res,
                           const std::string &err) {
-  std::string responseStr = "Error while serving " + req->GetUrl() + "\n" + err;
+  std::string responseStr = err;
   std::vector<char> responseBytes(responseStr.begin(), responseStr.end());
   res->SetStatus(HTTP_STATUS::Internal_Server_Error);
   res->Raw(responseBytes);
