@@ -213,3 +213,13 @@ void HttpRequest::AddAdditional(std::string key, std::string value) {
 std::string HttpRequest::GetAdditional(const std::string &key) {
   return this->additionalData[key];
 }
+bool HttpRequest::IsInHeaders(std::string headerName) {
+    std::transform(headerName.begin(), headerName.end(), headerName.begin(), ::tolower);
+    return this->headers.find(headerName) != this->headers.end();
+}
+std::string HttpRequest::GetHeaderByName(std::string requestedHeader) {
+    std::transform(requestedHeader.begin(), requestedHeader.end(), requestedHeader.begin(), ::tolower);
+    if(!this->IsInHeaders(requestedHeader))
+		throw std::runtime_error("Header not found");
+	return this->headers.at(requestedHeader);
+}
