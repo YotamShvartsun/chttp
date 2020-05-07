@@ -93,7 +93,19 @@ public:
    * @return Url parameter requested
    */
   std::string GetUrlParam(const std::string &) const;
-
+  /**
+   * Checks whether a string is in the header list of this request
+   * @param MaybeHeaderName The name to check for
+   * @return bool
+   */
+  bool IsInHeaders(std::string);
+  /**
+   * Gets a header value by it's name
+   * @param HeaderName The name of the requested header
+   * @return A string - The header value
+   * @throws std::runtime_error if the header is not found
+   */
+  std::string GetHeaderByName(std::string);
   /**
    * @brief  Populate this->parameters using the data given from Url object
    * @retval None
