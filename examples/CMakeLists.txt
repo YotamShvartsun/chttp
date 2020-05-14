@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 project(examples)
-find_library(CHTTP NAMES chttp)
+find_package(CHTTP NAMES chttp)
 
 set(CMAKE_CXX_STANDARD 14)
 
