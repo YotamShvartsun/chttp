@@ -4,6 +4,7 @@
             <b-button v-if="$parent.$data.userID" variant="outline-primary" @click="$router.push('/new_post')">Create a
                 new post
             </b-button>
+            <h4 v-else>Login to post updates</h4>
         </div>
         <div v-for="post in posts" v-bind:key="post.id">
             <Post :title="post.title" :body="post.body"></Post>
@@ -45,5 +46,8 @@
 
     .f-container > * {
         flex: 1 100%;
+    }
+    * > not h4 {
+        overflow-x: hidden;
     }
 </style>

@@ -8,6 +8,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/SQLiteCpp/include)
 include_directories(${CMAKE_CURRENT_LIST_DIR}/thirdparty/json)
 include_directories(${chttp_INCLUDE_DIRS})
+include_directories(../include)
 
 add_executable(examples main.cpp)
 

@@ -35,9 +35,10 @@
 
 <style scoped>
     .post-container {
-        border: 1px #b5c7d1 solid;
-        border-radius: 5px;
-        padding: 15px;
-        margin: auto;
+        display: block;
+        border: 0.08rem #b5c7d1 solid;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        /*margin: auto;*/
     }
 </style>

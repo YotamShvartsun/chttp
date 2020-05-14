@@ -26,7 +26,8 @@ add_library(chttp SHARED
         src/chttp/RequestHandler.cpp
         src/chttp/Router.cpp
         src/chttp/Server.cpp
-        include/chttp/data/Cookie.hpp)
+        include/chttp/data/Cookie.hpp
+        include/chttp/util/CHttpError.hpp)
 
 target_include_directories(chttp PRIVATE include)
 target_include_directories(chttp PRIVATE include/chttp)
